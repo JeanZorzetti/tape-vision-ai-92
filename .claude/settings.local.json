@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(move README.md bun.lockb components.json eslint.config.js index.html package-lock.json package.json postcss.config.js public src tailwind.config.ts tsconfig.app.json tsconfig.json tsconfig.node.json vite.config.ts Frontend/)",
+      "Bash(mv:*)",
+      "Bash(npm install)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
