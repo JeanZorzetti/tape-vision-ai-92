@@ -2,6 +2,7 @@ import React from 'react';
 import { Brain, Activity, Clock, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import { ConfidenceGauge } from './ConfidenceGauge';
 import { DataCard } from './DataCard';
+import { BackendStatus } from '../dashboard/BackendStatus';
 
 export interface AIStatus {
   confidence: number;
@@ -150,6 +151,9 @@ export const AIStatusPanel: React.FC<AIStatusPanelProps> = ({ aiStatus }) => {
           </div>
         )}
       </div>
+
+      {/* Backend Connection Status */}
+      <BackendStatus />
     </div>
   );
 };

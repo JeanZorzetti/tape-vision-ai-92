@@ -1,22 +1,21 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AIStatus, DecisionAnalysis, MarketData, TradeEntry, ChartDataPoint } from '@/types/trading';
+import { apiService } from '@/lib/api';
 
 // Custom hook for trading data management
 export const useTradingData = () => {
-  // Sample data - In real app, this would come from API/WebSocket
-  const [aiStatus] = useState<AIStatus>({
-    confidence: 87.5,
-    status: 'active',
-    lastAnalysis: '14:32:15',
-    patternsDetected: [
-      'Absorção de liquidez em 5.980',
-      'Rejeição em resistência histórica',
-      'Aumento de volume anômalo'
-    ],
-    marketContext: 'Mercado em tendência de alta com pressão compradora crescente. Identificado cluster de ordens em 5.975-5.980.',
-    entrySignals: 3,
-    aggressionLevel: 'high',
-    hiddenLiquidity: true
+  // Real data from backend API
+  const [aiStatus, setAiStatus] = useState<AIStatus>({
+    confidence: 0,
+    status: 'analyzing',
+    lastAnalysis: 'Carregando...',
+    patternsDetected: [],
+    marketContext: 'Conectando ao backend...',
+    entrySignals: 0,
+    aggressionLevel: 'low',
+    hiddenLiquidity: false,
+    processingLatency: 0,
+    memoryUsage: 0
   });
 
   const [decisionAnalysis] = useState<DecisionAnalysis>({
@@ -41,58 +40,84 @@ export const useTradingData = () => {
     recommendation: 'ENTRAR'
   });
 
-  const [marketData] = useState<MarketData>({
-    price: 5982.50,
-    priceChange: 15.75,
-    volume: 125000,
-    volatility: 1.8,
-    spread: 2,
-    sessionTime: '14:32:15',
-    marketPhase: 'open',
-    liquidityLevel: 'high',
-    orderBookImbalance: 35
+  const [marketData, setMarketData] = useState<MarketData>({
+    price: 0,
+    priceChange: 0,
+    volume: 0,
+    volatility: 0,
+    spread: 0,
+    sessionTime: 'Carregando...',
+    marketPhase: 'close',
+    liquidityLevel: 'low',
+    orderBookImbalance: 0,
+    timestamp: Date.now(),
+    bid: 0,
+    ask: 0,
+    last: 0,
+    high: 0,
+    low: 0
   });
 
-  const [tradingLog, setTradingLog] = useState<TradeEntry[]>([
-    {
-      id: '1',
-      timestamp: '14:32:15',
-      action: 'ANALYSIS',
-      symbol: 'WDO',
-      confidence: 87.5,
-      reason: 'Confluência técnica detectada - preparando entrada',
-      status: 'success'
-    },
-    {
-      id: '2',
-      timestamp: '14:31:42',
-      action: 'ALERT',
-      symbol: 'WDO',
-      reason: 'Absorção de liquidez em 5.980 - monitorar',
-      status: 'success'
-    },
-    {
-      id: '3',
-      timestamp: '14:30:18',
-      action: 'BUY',
-      symbol: 'WDO',
-      price: 5975.25,
-      quantity: 5,
-      confidence: 91.2,
-      reason: 'Entrada confirmada após rejeição',
-      pnl: 36.25,
-      status: 'success'
+  const [tradingLog, setTradingLog] = useState<TradeEntry[]>([]);
+
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load trading data from backend
+  const loadTradingData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await apiService.getTradingStatus();
+      
+      // Update AI status
+      setAiStatus(response.aiStatus);
+      
+      // Update market data
+      setMarketData(response.marketData);
+      
+      // Generate sample chart data based on market price
+      if (response.marketData.price > 0) {
+        const basePrice = response.marketData.price;
+        const now = Date.now();
+        const newChartData = Array.from({ length: 50 }, (_, i) => ({
+          timestamp: now - (50 - i) * 60000,
+          value: basePrice + Math.sin(i * 0.1) * 10 + Math.random() * 5,
+          volume: Math.floor(Math.random() * 1000) + 500
+        }));
+        setChartData(newChartData);
+      }
+      
+      console.log('[TradingData] Data loaded successfully from backend');
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load trading data';
+      setError(errorMessage);
+      console.error('[TradingData] Error loading data:', err);
+      
+      // Set fallback data on error
+      setAiStatus(prev => ({
+        ...prev,
+        status: 'error',
+        marketContext: 'Erro ao conectar com o backend'
+      }));
+      
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  }, []);
 
-  const [chartData, setChartData] = useState<ChartDataPoint[]>(() => {
-    const now = Date.now();
-    return Array.from({ length: 50 }, (_, i) => ({
-      timestamp: now - (50 - i) * 60000,
-      value: 5980 + Math.sin(i * 0.1) * 10 + Math.random() * 5,
-      volume: Math.floor(Math.random() * 1000) + 500
-    }));
-  });
+  // Refresh data periodically
+  useEffect(() => {
+    loadTradingData();
+    
+    // Set up polling every 5 seconds
+    const interval = setInterval(loadTradingData, 5000);
+    
+    return () => clearInterval(interval);
+  }, [loadTradingData]);
 
   const addTradeEntry = useCallback((entry: Omit<TradeEntry, 'id'>) => {
     const newEntry: TradeEntry = {
@@ -127,6 +152,9 @@ export const useTradingData = () => {
     tradingMetrics,
     addTradeEntry,
     updateChartData,
-    setChartData
+    setChartData,
+    loadTradingData,
+    isLoading,
+    error
   };
 };
