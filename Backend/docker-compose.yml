@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # Trading Backend Service
+  tape-vision-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tape-vision-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/tape-vision-ai
+      - NELOGICA_API_URL=https://api.nelogica.com.br
+      - WS_PORT=3002
+      - LOG_LEVEL=info
+      - TRADING_ENABLED=false
+      - MAX_DAILY_LOSS=500
+      - MAX_POSITION_SIZE=2
+      - TARGET_POINTS=2
+      - STOP_LOSS_POINTS=1.5
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - tape-vision-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { if (res.statusCode === 200) { process.exit(0) } else { process.exit(1) } }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB Database
+  mongo:
+    image: mongo:6-jammy
+    container_name: tape-vision-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=trading123
+      - MONGO_INITDB_DATABASE=tape-vision-ai
+    volumes:
+      - mongo_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - tape-vision-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: tape-vision-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass trading123
+    volumes:
+      - redis_data:/data
+    networks:
+      - tape-vision-network
+    restart: unless-stopped
+
+  # MongoDB Admin Interface (optional)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: tape-vision-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=trading123
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    depends_on:
+      - mongo
+    networks:
+      - tape-vision-network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+volumes:
+  mongo_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  tape-vision-network:
+    driver: bridge
