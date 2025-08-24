@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { SplashScreen } from '../loading/SplashScreen';
 import { useNotifications } from '../notifications/NotificationSystem';
 import { NelogicaConnection, NelogicaConfig } from '../api/NelogicaConnection';
 import { DashboardLayout } from '../layout/DashboardLayout';
@@ -9,7 +8,6 @@ import { useTradingData } from '@/hooks/useTradingData';
 import { useSystemStatus } from '@/hooks/useSystemStatus';
 
 export const TradingDashboard: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
   // Custom hooks for better separation of concerns
@@ -51,7 +49,7 @@ export const TradingDashboard: React.FC = () => {
 
   // Simulate real-time chart updates
   useEffect(() => {
-    if (!isLoading && nelogicaStatus.isConnected) {
+    if (nelogicaStatus.isConnected) {
       const interval = setInterval(() => {
         const newPoint = {
           timestamp: Date.now(),
@@ -63,11 +61,11 @@ export const TradingDashboard: React.FC = () => {
 
       return () => clearInterval(interval);
     }
-  }, [isLoading, nelogicaStatus.isConnected, chartData, updateChartData]);
+  }, [nelogicaStatus.isConnected, chartData, updateChartData]);
 
   // Sample notifications
   useEffect(() => {
-    if (!isLoading && notificationsEnabled) {
+    if (notificationsEnabled) {
       // Initial welcome notification
       setTimeout(() => {
         notifySuccess(
@@ -96,11 +94,7 @@ export const TradingDashboard: React.FC = () => {
 
       return () => clearInterval(notificationInterval);
     }
-  }, [isLoading, notificationsEnabled, notifySuccess, notifyTrade, notifyInfo, notifyWarning]);
-
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
+  }, [notificationsEnabled, notifySuccess, notifyTrade, notifyInfo, notifyWarning]);
 
   const handleEmergencyStopWithNotification = () => {
     handleEmergencyStop();
@@ -144,10 +138,6 @@ export const TradingDashboard: React.FC = () => {
       notifyError('Conexão Perdida', 'Conexão com API Nelogica foi perdida');
     }
   };
-
-  if (isLoading) {
-    return <SplashScreen onLoadingComplete={handleLoadingComplete} />;
-  }
 
   return (
     <DashboardLayout
