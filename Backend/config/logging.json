@@ -1,0 +1,128 @@
+{
+  "levels": {
+    "error": 0,
+    "warn": 1,
+    "info": 2,
+    "http": 3,
+    "verbose": 4,
+    "debug": 5,
+    "silly": 6
+  },
+  "transports": {
+    "console": {
+      "level": "debug",
+      "handleExceptions": true,
+      "format": {
+        "timestamp": true,
+        "colorize": true,
+        "errors": { "stack": true }
+      }
+    },
+    "file": {
+      "trading": {
+        "level": "info",
+        "filename": "./logs/trading-%DATE%.log",
+        "datePattern": "YYYY-MM-DD",
+        "zippedArchive": true,
+        "maxSize": "20m",
+        "maxFiles": "14d",
+        "format": {
+          "timestamp": true,
+          "json": true
+        }
+      },
+      "error": {
+        "level": "error",
+        "filename": "./logs/error-%DATE%.log",
+        "datePattern": "YYYY-MM-DD",
+        "zippedArchive": true,
+        "maxSize": "20m",
+        "maxFiles": "30d",
+        "handleExceptions": true,
+        "format": {
+          "timestamp": true,
+          "json": true,
+          "errors": { "stack": true }
+        }
+      },
+      "combined": {
+        "level": "info",
+        "filename": "./logs/combined-%DATE%.log",
+        "datePattern": "YYYY-MM-DD",
+        "zippedArchive": true,
+        "maxSize": "20m",
+        "maxFiles": "14d"
+      }
+    }
+  },
+  "categories": {
+    "trading": {
+      "level": "info",
+      "transports": ["console", "trading", "combined"]
+    },
+    "api": {
+      "level": "info",
+      "transports": ["console", "combined"]
+    },
+    "database": {
+      "level": "warn",
+      "transports": ["console", "error", "combined"]
+    },
+    "websocket": {
+      "level": "info",
+      "transports": ["console", "combined"]
+    },
+    "nelogica": {
+      "level": "info",
+      "transports": ["console", "trading", "combined"]
+    },
+    "risk": {
+      "level": "warn",
+      "transports": ["console", "error", "trading", "combined"]
+    },
+    "performance": {
+      "level": "warn",
+      "transports": ["console", "combined"]
+    }
+  },
+  "filters": {
+    "sensitive": {
+      "enabled": true,
+      "fields": [
+        "password",
+        "apiKey",
+        "clientSecret",
+        "token",
+        "authorization",
+        "secret"
+      ],
+      "replacement": "[REDACTED]"
+    }
+  },
+  "alerts": {
+    "error": {
+      "enabled": true,
+      "threshold": 5,
+      "timeWindow": 300,
+      "cooldown": 600
+    },
+    "performance": {
+      "enabled": true,
+      "threshold": 10,
+      "timeWindow": 60
+    }
+  },
+  "audit": {
+    "enabled": true,
+    "events": [
+      "user_login",
+      "config_change",
+      "trading_start",
+      "trading_stop",
+      "emergency_stop",
+      "large_trade",
+      "risk_violation"
+    ],
+    "retention": "90d"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "mongodb": {
+    "development": {
+      "uri": "mongodb://localhost:27017/tape-vision-ai-dev",
+      "options": {
+        "maxPoolSize": 10,
+        "serverSelectionTimeoutMS": 5000,
+        "socketTimeoutMS": 45000,
+        "family": 4,
+        "keepAlive": true,
+        "keepAliveInitialDelay": 300000
+      },
+      "collections": {
+        "trades": {
+          "indexes": [
+            { "key": { "timestamp": 1 }, "background": true },
+            { "key": { "symbol": 1, "timestamp": 1 }, "background": true },
+            { "key": { "sessionId": 1 }, "background": true }
+          ]
+        },
+        "marketData": {
+          "indexes": [
+            { "key": { "timestamp": 1 }, "background": true, "expireAfterSeconds": 86400 },
+            { "key": { "symbol": 1, "timestamp": 1 }, "background": true }
+          ]
+        },
+        "sessions": {
+          "indexes": [
+            { "key": { "startTime": 1 }, "background": true },
+            { "key": { "date": 1 }, "background": true }
+          ]
+        },
+        "alerts": {
+          "indexes": [
+            { "key": { "timestamp": 1 }, "background": true, "expireAfterSeconds": 2592000 },
+            { "key": { "severity": 1 }, "background": true }
+          ]
+        }
+      }
+    },
+    "production": {
+      "uri": "mongodb://mongo:27017/tape-vision-ai",
+      "options": {
+        "maxPoolSize": 50,
+        "minPoolSize": 5,
+        "maxIdleTimeMS": 30000,
+        "serverSelectionTimeoutMS": 5000,
+        "socketTimeoutMS": 45000,
+        "family": 4,
+        "keepAlive": true,
+        "keepAliveInitialDelay": 300000,
+        "compression": "zstd",
+        "readPreference": "primary"
+      }
+    }
+  },
+  "redis": {
+    "development": {
+      "host": "localhost",
+      "port": 6379,
+      "password": null,
+      "db": 1,
+      "keyPrefix": "tape-vision-dev:",
+      "retryDelayOnFailover": 100,
+      "enableReadyCheck": false,
+      "maxRetriesPerRequest": 3,
+      "lazyConnect": true
+    },
+    "production": {
+      "host": "redis",
+      "port": 6379,
+      "password": null,
+      "db": 0,
+      "keyPrefix": "tape-vision-prod:",
+      "retryDelayOnFailover": 100,
+      "enableReadyCheck": false,
+      "maxRetriesPerRequest": 3,
+      "lazyConnect": true,
+      "connectTimeout": 60000,
+      "commandTimeout": 5000,
+      "family": 4
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 6
+    },
+    "destinations": {
+      "local": {
+        "enabled": true,
+        "path": "./backups"
+      },
+      "s3": {
+        "enabled": false,
+        "bucket": "tape-vision-backups",
+        "region": "us-east-1"
+      }
+    }
+  },
+  "migrations": {
+    "enabled": true,
+    "path": "./src/database/migrations",
+    "collection": "migrations"
+  },
+  "seeds": {
+    "enabled": false,
+    "path": "./src/database/seeds"
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": {
+      "connectionPool": true,
+      "queryPerformance": true,
+      "slowQueries": {
+        "threshold": 100,
+        "log": true
+      }
+    },
+    "alerts": {
+      "connectionFailures": true,
+      "highLatency": {
+        "threshold": 500,
+        "enabled": true
+      },
+      "lowConnections": {
+        "threshold": 2,
+        "enabled": true
+      }
+    }
+  }
+}

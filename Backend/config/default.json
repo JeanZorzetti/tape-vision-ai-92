@@ -1,0 +1,118 @@
+{
+  "server": {
+    "port": 3001,
+    "host": "localhost",
+    "cors": {
+      "origin": ["http://localhost:8080", "http://localhost:3000"],
+      "credentials": true
+    },
+    "rateLimit": {
+      "windowMs": 15000,
+      "max": 100
+    }
+  },
+  "trading": {
+    "symbol": "WDO",
+    "enabled": false,
+    "maxDailyLoss": 500,
+    "maxPositionSize": 2,
+    "targetPoints": 2,
+    "stopLossPoints": 1.5,
+    "dailyTargetPoints": 3,
+    "maxConsecutiveLosses": 3,
+    "confidenceThreshold": 0.9,
+    "maxSignalsPerHour": 10,
+    "riskCheckInterval": 1000,
+    "emergencyStopEnabled": true
+  },
+  "ai": {
+    "analysisSettings": {
+      "confidenceThreshold": 0.9,
+      "maxSignalsPerHour": 10,
+      "enablePatternRecognition": true,
+      "enableTapeReading": true,
+      "enableOrderFlowAnalysis": true,
+      "processingTimeout": 5000,
+      "memoryLimit": 512
+    },
+    "patterns": {
+      "volumeClusterThreshold": 1000,
+      "absorptionThreshold": 0.7,
+      "aggressionThreshold": 0.8,
+      "falseOrderThreshold": 0.5,
+      "liquidityThreshold": 10000
+    }
+  },
+  "database": {
+    "mongodb": {
+      "uri": "mongodb://localhost:27017/tape-vision-ai",
+      "options": {
+        "maxPoolSize": 10,
+        "serverSelectionTimeoutMS": 5000,
+        "socketTimeoutMS": 45000
+      }
+    },
+    "redis": {
+      "host": "localhost",
+      "port": 6379,
+      "password": null,
+      "db": 0,
+      "keyPrefix": "tape-vision:",
+      "ttl": 3600
+    }
+  },
+  "nelogica": {
+    "apiUrl": "https://api.nelogica.com.br",
+    "environment": "demo",
+    "timeout": 30000,
+    "maxRetries": 3,
+    "retryDelay": 1000,
+    "autoReconnect": true,
+    "heartbeatInterval": 30000
+  },
+  "websocket": {
+    "port": 3002,
+    "pingInterval": 25000,
+    "pingTimeout": 20000,
+    "upgradeTimeout": 10000,
+    "maxHttpBufferSize": 1e6
+  },
+  "logging": {
+    "level": "info",
+    "file": {
+      "enabled": true,
+      "filename": "./logs/trading-%DATE%.log",
+      "datePattern": "YYYY-MM-DD",
+      "maxSize": "20m",
+      "maxFiles": "14d"
+    },
+    "console": {
+      "enabled": true,
+      "colorize": true,
+      "timestamp": true
+    }
+  },
+  "alerts": {
+    "email": {
+      "enabled": false,
+      "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "secure": false
+      },
+      "from": "trading@yourcompany.com",
+      "to": ["admin@yourcompany.com"]
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    }
+  },
+  "performance": {
+    "maxLatency": 10,
+    "maxMemoryUsage": 80,
+    "maxCpuUsage": 70,
+    "healthCheckInterval": 30000,
+    "metricsRetentionDays": 30
+  }
+}

@@ -95,3 +95,97 @@ export interface Notification {
   action?: NotificationAction;
   duration?: number;
 }
+
+export interface SystemHealth {
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  timestamp: string;
+  components: {
+    tradingEngine: 'healthy' | 'stopped' | 'error';
+    database: 'healthy' | 'disconnected' | 'error';
+    nelogica: 'healthy' | 'disconnected' | 'error';
+    redis: 'healthy' | 'disconnected' | 'error';
+  };
+  performance: {
+    uptime: number;
+    memoryUsage: {
+      rss: number;
+      heapTotal: number;
+      heapUsed: number;
+      external: number;
+      arrayBuffers: number;
+    };
+    latency: {
+      database: number;
+      nelogica: number;
+    };
+  };
+}
+
+export interface TradingConfig {
+  analysisSettings: {
+    confidenceThreshold: number;
+    maxSignalsPerHour: number;
+    enablePatternRecognition: boolean;
+    processingTimeout: number;
+    memoryLimit: number;
+  };
+  riskParameters: {
+    maxDailyLoss: number;
+    maxPositionSize: number;
+    emergencyStopEnabled: boolean;
+  };
+  general: {
+    enabled: boolean;
+    autoTrading: boolean;
+    debugMode: boolean;
+  };
+}
+
+export interface Position {
+  id: string;
+  symbol: string;
+  side: 'long' | 'short';
+  size: number;
+  avgPrice: number;
+  currentPrice: number;
+  unrealizedPnL: number;
+  realizedPnL: number;
+  timestamp: string;
+  status: 'open' | 'closed' | 'closing';
+}
+
+export interface TradingSession {
+  id: string;
+  startTime: string;
+  endTime?: string;
+  totalTrades: number;
+  totalPnL: number;
+  winRate: number;
+  status: 'active' | 'paused' | 'completed';
+  performance: {
+    bestTrade: number;
+    worstTrade: number;
+    averageTrade: number;
+    sharpeRatio: number;
+  };
+}
+
+export interface RiskParameters {
+  maxDailyLoss: number;
+  maxPositionSize: number;
+  maxDrawdown: number;
+  maxConcurrentPositions: number;
+  riskPerTrade: number;
+  emergencyStopEnabled: boolean;
+}
+
+export interface PatternMatch {
+  id: string;
+  name: string;
+  confidence: number;
+  timestamp: string;
+  symbol: string;
+  context: string;
+  signals: string[];
+  recommendation: 'buy' | 'sell' | 'hold';
+}

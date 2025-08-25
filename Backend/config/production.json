@@ -1,0 +1,80 @@
+{
+  "server": {
+    "port": 3001,
+    "host": "0.0.0.0",
+    "cors": {
+      "origin": ["https://your-frontend.vercel.app", "https://your-domain.com"],
+      "credentials": true
+    },
+    "rateLimit": {
+      "windowMs": 15000,
+      "max": 50
+    }
+  },
+  "trading": {
+    "enabled": false,
+    "maxDailyLoss": 500,
+    "maxPositionSize": 2,
+    "confidenceThreshold": 0.95,
+    "emergencyStopEnabled": true,
+    "maxConsecutiveLosses": 2
+  },
+  "ai": {
+    "analysisSettings": {
+      "confidenceThreshold": 0.95,
+      "maxSignalsPerHour": 5,
+      "enablePatternRecognition": true,
+      "processingTimeout": 3000,
+      "memoryLimit": 1024
+    }
+  },
+  "database": {
+    "mongodb": {
+      "uri": "mongodb://mongo:27017/tape-vision-ai",
+      "options": {
+        "maxPoolSize": 20,
+        "serverSelectionTimeoutMS": 5000
+      }
+    },
+    "redis": {
+      "host": "redis",
+      "port": 6379,
+      "db": 0,
+      "keyPrefix": "tape-vision-prod:"
+    }
+  },
+  "nelogica": {
+    "environment": "production",
+    "autoReconnect": true,
+    "timeout": 30000,
+    "maxRetries": 5
+  },
+  "logging": {
+    "level": "warn",
+    "file": {
+      "enabled": true,
+      "filename": "./logs/trading-%DATE%.log",
+      "datePattern": "YYYY-MM-DD",
+      "maxSize": "50m",
+      "maxFiles": "30d"
+    },
+    "console": {
+      "enabled": false
+    }
+  },
+  "alerts": {
+    "email": {
+      "enabled": true
+    },
+    "webhook": {
+      "enabled": true
+    }
+  },
+  "performance": {
+    "maxLatency": 5,
+    "maxMemoryUsage": 85,
+    "maxCpuUsage": 75,
+    "healthCheckInterval": 60000,
+    "metricsRetentionDays": 90
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "symbols": {
+    "WDO": {
+      "name": "Mini Dólar",
+      "type": "futures",
+      "exchange": "B3",
+      "tickSize": 0.5,
+      "tickValue": 0.1,
+      "contractSize": 10,
+      "marginRequirement": 1000,
+      "tradingHours": {
+        "start": "09:00",
+        "end": "18:00",
+        "timezone": "America/Sao_Paulo"
+      },
+      "sessions": [
+        {
+          "name": "regular",
+          "start": "09:00",
+          "end": "18:00"
+        },
+        {
+          "name": "after_hours",
+          "start": "18:05",
+          "end": "08:55"
+        }
+      ]
+    },
+    "WIN": {
+      "name": "Mini Ibovespa",
+      "type": "futures",
+      "exchange": "B3",
+      "tickSize": 5,
+      "tickValue": 0.2,
+      "contractSize": 1,
+      "marginRequirement": 5000,
+      "tradingHours": {
+        "start": "09:00",
+        "end": "18:00",
+        "timezone": "America/Sao_Paulo"
+      }
+    }
+  },
+  "strategies": {
+    "tapeReading": {
+      "enabled": true,
+      "parameters": {
+        "volumeClusterSize": 1000,
+        "absorptionThreshold": 0.7,
+        "aggressionLevel": "medium",
+        "falseOrderDetection": true,
+        "liquidityAnalysis": true,
+        "patternRecognition": true
+      },
+      "filters": {
+        "minVolume": 500,
+        "maxSpread": 2,
+        "marketPhase": ["regular", "closing"],
+        "volatilityRange": [0.5, 3.0]
+      }
+    },
+    "orderFlow": {
+      "enabled": true,
+      "parameters": {
+        "imbalanceThreshold": 0.6,
+        "flowMomentum": 0.8,
+        "hiddenLiquidityDetection": true,
+        "aggressiveOrderThreshold": 1000
+      }
+    },
+    "scalping": {
+      "enabled": false,
+      "parameters": {
+        "quickEntryExit": true,
+        "maxHoldingTime": 300,
+        "targetTicks": 2,
+        "stopTicks": 1.5
+      }
+    }
+  },
+  "riskManagement": {
+    "position": {
+      "maxSize": 2,
+      "maxDailyTrades": 10,
+      "maxConsecutiveLosses": 3,
+      "cooldownPeriod": 300
+    },
+    "monetary": {
+      "maxDailyLoss": 500,
+      "maxDrawdown": 1000,
+      "riskPerTrade": 0.02,
+      "rewardRiskRatio": 1.5
+    },
+    "time": {
+      "maxTradingHours": 8,
+      "noTradingZones": [
+        { "start": "12:00", "end": "13:00", "reason": "Lunch break" },
+        { "start": "17:30", "end": "18:00", "reason": "Close auction" }
+      ]
+    }
+  },
+  "entry": {
+    "conditions": {
+      "minConfidence": 0.9,
+      "confluenceRequired": 2,
+      "patternConfirmation": true,
+      "volumeConfirmation": true,
+      "priceActionConfirmation": true
+    },
+    "filters": {
+      "timeOfDay": {
+        "enabled": true,
+        "allowedHours": ["09:00-11:30", "14:00-17:30"]
+      },
+      "marketConditions": {
+        "minLiquidity": 10000,
+        "maxSpread": 2,
+        "volatilityRange": [0.8, 2.5]
+      }
+    }
+  },
+  "exit": {
+    "targets": {
+      "primary": 2,
+      "secondary": 3,
+      "maximum": 5
+    },
+    "stops": {
+      "initial": 1.5,
+      "trailing": {
+        "enabled": true,
+        "distance": 1,
+        "trigger": 1.5
+      },
+      "time": {
+        "enabled": true,
+        "maxHoldingTime": 1800
+      }
+    },
+    "partialExits": {
+      "enabled": true,
+      "levels": [
+        { "target": 1.5, "percentage": 50 },
+        { "target": 2.5, "percentage": 25 }
+      ]
+    }
+  },
+  "alerts": {
+    "conditions": [
+      {
+        "name": "highConfidenceSignal",
+        "threshold": 0.95,
+        "enabled": true
+      },
+      {
+        "name": "unusualVolume",
+        "threshold": 5000,
+        "enabled": true
+      },
+      {
+        "name": "priceRejection",
+        "threshold": 3,
+        "enabled": true
+      },
+      {
+        "name": "liquidityAbsorption",
+        "threshold": 0.8,
+        "enabled": true
+      }
+    ],
+    "notifications": {
+      "sound": true,
+      "popup": true,
+      "email": false,
+      "webhook": false
+    }
+  }
+}
