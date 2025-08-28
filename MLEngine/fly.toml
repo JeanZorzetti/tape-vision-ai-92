@@ -1,0 +1,28 @@
+# Fly.io configuration for AI Trading API
+app = "ai-trading-api"
+primary_region = "gru"  # São Paulo region
+
+[build]
+  dockerfile = "Dockerfile.prod"
+
+[http_service]
+  internal_port = 8001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "8001"
+  ENVIRONMENT = "production"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

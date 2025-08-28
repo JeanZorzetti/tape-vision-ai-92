@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-trading-api-prod
+    env: docker
+    dockerfilePath: ./Dockerfile.prod
+    region: oregon
+    plan: starter
+    healthCheckPath: /health
+    domains:
+      - ml.aitradingapi.roilabs.com.br
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 8001
+      - key: ENVIRONMENT
+        value: production
+      - key: CONFIDENCE_THRESHOLD
+        value: 0.90
+      - key: ALLOWED_ORIGINS
+        value: https://aitradingapi.roilabs.com.br,https://roilabs.com.br
+      - key: LOG_LEVEL
+        value: INFO
