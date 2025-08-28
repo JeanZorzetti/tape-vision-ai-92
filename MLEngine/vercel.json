@@ -1,28 +1,13 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.9",
+      "maxDuration": 30
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.py"
-    }
-  ],
+  },
   "env": {
     "ENVIRONMENT": "production",
     "CONFIDENCE_THRESHOLD": "0.90"
-  },
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 30
-    }
   },
   "headers": [
     {
@@ -30,7 +15,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://ml.aitradingapi.roilabs.com.br"
+          "value": "*"
         },
         {
           "key": "Access-Control-Allow-Methods",
