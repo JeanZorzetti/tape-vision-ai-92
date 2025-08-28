@@ -90,7 +90,7 @@ export class MLEngineService extends EventEmitter {
   private cacheTimeout: number = 1000; // 1 second cache
 
   constructor(
-    private mlEngineUrl: string = 'http://localhost:8001',
+    private mlEngineUrl: string = process.env.ML_ENGINE_URL || 'https://ml.aitradingapi.roilabs.com.br',
     logger: Logger
   ) {
     super();
@@ -278,7 +278,7 @@ export class MLEngineService extends EventEmitter {
 
       // Make request to Python ML Engine
       const response: AxiosResponse<MLAnalysisResponse> = await this.client.post(
-        '/api/v1/analyze_market_data',
+        '/v1/analyze',
         requestData
       );
 
@@ -362,7 +362,7 @@ export class MLEngineService extends EventEmitter {
       };
 
       const response: AxiosResponse<MLPatternResponse> = await this.client.post(
-        '/api/v1/detect_patterns',
+        '/v1/patterns',
         requestData
       );
 
@@ -388,7 +388,7 @@ export class MLEngineService extends EventEmitter {
         return null;
       }
 
-      const response: AxiosResponse<MLModelStatus> = await this.client.get('/api/v1/model_status');
+      const response: AxiosResponse<MLModelStatus> = await this.client.get('/v1/status');
       return response.data;
 
     } catch (error) {
@@ -407,7 +407,7 @@ export class MLEngineService extends EventEmitter {
         return false;
       }
 
-      const response: AxiosResponse = await this.client.post('/api/v1/retrain_models', { force });
+      const response: AxiosResponse = await this.client.post('/v1/retrain', { force });
       
       this.logger.info('Model retraining initiated', { force });
       return response.status === 200;
