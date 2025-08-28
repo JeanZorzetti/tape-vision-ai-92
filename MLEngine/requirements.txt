@@ -1,4 +1,1 @@
-# Ultra-Lightweight FastAPI for Vercel Serverless
-fastapi
-uvicorn
-pydantic
+# No external dependencies - pure Python stdlib only
