@@ -33,7 +33,10 @@ export const TradingDashboard: React.FC = () => {
     chartData,
     addTradeEntry,
     updateChartData,
-    setChartData
+    setChartData,
+    mlEngineError,
+    isLoading,
+    refreshMLData
   } = useTradingData();
 
   // Notifications system
@@ -181,6 +184,9 @@ export const TradingDashboard: React.FC = () => {
         tradingLog={tradingLog}
         chartData={chartData}
         isConnected={isConnected}
+        mlEngineError={mlEngineError}
+        mlEngineLoading={isLoading}
+        onRefreshMLData={refreshMLData}
       />
     </DashboardLayout>
   );

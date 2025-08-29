@@ -1,9 +1,13 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AIStatus, DecisionAnalysis, MarketData, TradeEntry, ChartDataPoint } from '@/types/trading';
 import { apiService } from '@/lib/api';
+import { useMLEngineData } from './useMLEngineData';
 
 // Custom hook for trading data management
 export const useTradingData = () => {
+  // Use real ML Engine data
+  const mlEngineData = useMLEngineData();
+  
   // Real data from backend API
   const [aiStatus, setAiStatus] = useState<AIStatus>({
     confidence: 0,
@@ -16,28 +20,6 @@ export const useTradingData = () => {
     hiddenLiquidity: false,
     processingLatency: 0,
     memoryUsage: 0
-  });
-
-  const [decisionAnalysis] = useState<DecisionAnalysis>({
-    entryReason: 'Confluência de fatores técnicos: absorção de liquidez em suporte, rejeição de ordens falsas e aumento de agressão compradora.',
-    variablesAnalyzed: [
-      { name: 'Volume Profile', weight: 25, score: 92 },
-      { name: 'Order Flow Imbalance', weight: 20, score: 88 },
-      { name: 'Price Action Context', weight: 15, score: 85 },
-      { name: 'Historical Pattern Match', weight: 15, score: 78 },
-      { name: 'Market Microstructure', weight: 25, score: 95 }
-    ],
-    componentScores: {
-      buyAggression: 92,
-      sellAggression: 23,
-      liquidityAbsorption: 88,
-      falseOrdersDetected: 67,
-      flowMomentum: 85,
-      historicalPattern: 78
-    },
-    finalCertainty: 87.5,
-    nextAction: 'Aguardar confirmação acima de 5.985 para entrada long com stop em 5.970.',
-    recommendation: 'ENTRAR'
   });
 
   const [marketData, setMarketData] = useState<MarketData>({
@@ -145,7 +127,7 @@ export const useTradingData = () => {
 
   return {
     aiStatus,
-    decisionAnalysis,
+    decisionAnalysis: mlEngineData.decisionAnalysis, // Use real ML Engine data
     marketData,
     tradingLog,
     chartData,
@@ -154,7 +136,11 @@ export const useTradingData = () => {
     updateChartData,
     setChartData,
     loadTradingData,
-    isLoading,
-    error
+    isLoading: isLoading || mlEngineData.isLoading,
+    error: error || mlEngineData.error,
+    mlEngineError: mlEngineData.error,
+    mlEngineLastUpdate: mlEngineData.lastUpdate,
+    refreshMLData: mlEngineData.refreshData,
+    hasMLData: mlEngineData.hasData
   };
 };

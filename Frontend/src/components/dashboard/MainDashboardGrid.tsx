@@ -8,11 +8,14 @@ import { AIStatus, DecisionAnalysis, MarketData, TradeEntry, ChartDataPoint } fr
 
 interface MainDashboardGridProps {
   aiStatus: AIStatus;
-  decisionAnalysis: DecisionAnalysis;
+  decisionAnalysis: DecisionAnalysis | null;
   marketData: MarketData;
   tradingLog: TradeEntry[];
   chartData: ChartDataPoint[];
   isConnected: boolean;
+  mlEngineError?: string | null;
+  mlEngineLoading?: boolean;
+  onRefreshMLData?: () => void;
 }
 
 export const MainDashboardGrid: React.FC<MainDashboardGridProps> = ({
@@ -21,7 +24,10 @@ export const MainDashboardGrid: React.FC<MainDashboardGridProps> = ({
   marketData,
   tradingLog,
   chartData,
-  isConnected
+  isConnected,
+  mlEngineError,
+  mlEngineLoading,
+  onRefreshMLData
 }) => {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -32,7 +38,12 @@ export const MainDashboardGrid: React.FC<MainDashboardGridProps> = ({
       
       {/* Decision Analysis - 2 columns */}
       <section className="xl:col-span-2 space-y-6" aria-label="Análise e gráficos">
-        <DecisionPanel analysis={decisionAnalysis} />
+        <DecisionPanel 
+          analysis={decisionAnalysis}
+          isLoading={mlEngineLoading}
+          error={mlEngineError}
+          onRefresh={onRefreshMLData}
+        />
         
         {/* Live Chart */}
         {isConnected && (

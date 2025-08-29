@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, TrendingUp, Shield, AlertTriangle, Zap, BarChart3 } from 'lucide-react';
+import { Target, TrendingUp, Shield, AlertTriangle, Zap, BarChart3, RefreshCw, WifiOff } from 'lucide-react';
 
 export interface DecisionAnalysis {
   entryReason: string;
@@ -22,10 +22,18 @@ export interface DecisionAnalysis {
 }
 
 interface DecisionPanelProps {
-  analysis: DecisionAnalysis;
+  analysis: DecisionAnalysis | null;
+  isLoading?: boolean;
+  error?: string | null;
+  onRefresh?: () => void;
 }
 
-export const DecisionPanel: React.FC<DecisionPanelProps> = ({ analysis }) => {
+export const DecisionPanel: React.FC<DecisionPanelProps> = ({ 
+  analysis, 
+  isLoading = false, 
+  error = null, 
+  onRefresh 
+}) => {
   const getRecommendationClass = (rec: string) => {
     switch (rec) {
       case 'ENTRAR': return 'value-buy';
@@ -49,6 +57,91 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ analysis }) => {
     return AlertTriangle;
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+            <Target className="w-5 h-5 text-text-accent" />
+            Análise de Decisão
+          </h3>
+          <div className="flex items-center gap-2 text-text-accent">
+            <RefreshCw className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Carregando...</span>
+          </div>
+        </div>
+        <div className="trading-card">
+          <div className="space-y-3 animate-pulse">
+            <div className="h-4 bg-bg-tertiary rounded w-3/4"></div>
+            <div className="h-4 bg-bg-tertiary rounded w-1/2"></div>
+            <div className="h-4 bg-bg-tertiary rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+            <Target className="w-5 h-5 text-text-accent" />
+            Análise de Decisão
+          </h3>
+          <button 
+            onClick={onRefresh}
+            className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-sell-primary/20 text-sell-primary border border-sell-primary/30 hover:bg-sell-primary/30 transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Tentar Novamente
+          </button>
+        </div>
+        <div className="trading-card">
+          <div className="flex items-center gap-3 text-sell-primary">
+            <WifiOff className="w-5 h-5" />
+            <div>
+              <p className="font-medium">ML Engine Indisponível</p>
+              <p className="text-sm text-text-secondary mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!analysis) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+            <Target className="w-5 h-5 text-text-accent" />
+            Análise de Decisão
+          </h3>
+          <button 
+            onClick={onRefresh}
+            className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-text-accent/20 text-text-accent border border-text-accent/30 hover:bg-text-accent/30 transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Atualizar
+          </button>
+        </div>
+        <div className="trading-card">
+          <div className="flex items-center gap-3 text-text-secondary">
+            <AlertTriangle className="w-5 h-5" />
+            <div>
+              <p className="font-medium">Nenhum Dado Disponível</p>
+              <p className="text-sm">Aguardando análise da ML Engine...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -56,13 +149,24 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ analysis }) => {
           <Target className="w-5 h-5 text-text-accent" />
           Análise de Decisão
         </h3>
-        <div className={`
-          px-3 py-1 rounded-full text-sm font-bold
-          ${analysis.recommendation === 'ENTRAR' ? 'bg-buy-primary/20 text-buy-primary border border-buy-primary/30' :
-            analysis.recommendation === 'AGUARDAR' ? 'bg-text-accent/20 text-text-accent border border-text-accent/30' :
-            'bg-sell-primary/20 text-sell-primary border border-sell-primary/30'}
-        `}>
-          {analysis.recommendation}
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button 
+              onClick={onRefresh}
+              className="p-1 rounded-full hover:bg-bg-tertiary transition-colors"
+              title="Atualizar análise"
+            >
+              <RefreshCw className="w-3 h-3 text-text-secondary" />
+            </button>
+          )}
+          <div className={`
+            px-3 py-1 rounded-full text-sm font-bold
+            ${analysis.recommendation === 'ENTRAR' ? 'bg-buy-primary/20 text-buy-primary border border-buy-primary/30' :
+              analysis.recommendation === 'AGUARDAR' ? 'bg-text-accent/20 text-text-accent border border-text-accent/30' :
+              'bg-sell-primary/20 text-sell-primary border border-sell-primary/30'}
+          `}>
+            {analysis.recommendation}
+          </div>
         </div>
       </div>
 
