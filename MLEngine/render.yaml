@@ -7,7 +7,7 @@ services:
     plan: starter
     healthCheckPath: /health
     domains:
-      - ml.aitradingapi.roilabs.com.br
+      - ml.aitrading.roilabs.com.br
     envVars:
       - key: HOST
         value: 0.0.0.0
@@ -18,6 +18,6 @@ services:
       - key: CONFIDENCE_THRESHOLD
         value: 0.90
       - key: ALLOWED_ORIGINS
-        value: https://aitradingapi.roilabs.com.br,https://roilabs.com.br
+        value: https://aitradingbot.roilabs.com.br,https://roilabs.com.br
       - key: LOG_LEVEL
         value: INFO

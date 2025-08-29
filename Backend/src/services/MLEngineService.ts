@@ -90,7 +90,7 @@ export class MLEngineService extends EventEmitter {
   private cacheTimeout: number = 1000; // 1 second cache
 
   constructor(
-    private mlEngineUrl: string = process.env.ML_ENGINE_URL || 'https://ml.aitradingapi.roilabs.com.br',
+    private mlEngineUrl: string = process.env.ML_ENGINE_URL || 'https://ml.aitrading.roilabs.com.br',
     logger: Logger
   ) {
     super();

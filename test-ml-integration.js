@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 
-const ML_ENGINE_URL = 'https://ml.aitradingapi.roilabs.com.br'; // Update when domain is configured
+const ML_ENGINE_URL = 'https://ml.aitrading.roilabs.com.br'; // Correct ML Engine URL
 // For now: use Vercel URL (e.g., your-app-abc123.vercel.app)
 
 async function testMLEngine() {
