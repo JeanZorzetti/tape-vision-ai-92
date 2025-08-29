@@ -1,6 +1,7 @@
 import React from 'react';
-import { TrendingUp, Volume2, Clock, DollarSign, Activity } from 'lucide-react';
+import { TrendingUp, Volume2, Clock, DollarSign, Activity, AlertTriangle, Bot, Target } from 'lucide-react';
 import { DataCard } from './DataCard';
+import { DecisionAnalysis } from '@/types/trading';
 
 export interface MarketData {
   price: number;
@@ -16,9 +17,15 @@ export interface MarketData {
 
 interface MarketContextProps {
   marketData: MarketData;
+  decisionAnalysis?: DecisionAnalysis | null;
+  mlEngineError?: string | null;
 }
 
-export const MarketContext: React.FC<MarketContextProps> = ({ marketData }) => {
+export const MarketContext: React.FC<MarketContextProps> = ({ 
+  marketData, 
+  decisionAnalysis, 
+  mlEngineError 
+}) => {
   const getPhaseConfig = (phase: MarketData['marketPhase']) => {
     switch (phase) {
       case 'pre-market':
@@ -171,14 +178,72 @@ export const MarketContext: React.FC<MarketContextProps> = ({ marketData }) => {
         </div>
       </div>
 
-      {/* Market Alerts */}
+      {/* Market Alerts - Smart ML-Based */}
       <div className="trading-card">
         <h4 className="font-medium text-text-secondary mb-2">Alertas de Mercado</h4>
         <div className="space-y-2">
+          {/* ML Engine Status Alert */}
+          {mlEngineError ? (
+            <div className="flex items-center gap-2 text-sm text-sell-primary">
+              <AlertTriangle className="w-3 h-3" />
+              <span>ML Engine desconectado - alertas limitados</span>
+            </div>
+          ) : decisionAnalysis ? (
+            <div className="flex items-center gap-2 text-sm text-buy-primary">
+              <Bot className="w-3 h-3" />
+              <span>IA ativa - confiança {decisionAnalysis.finalCertainty}%</span>
+            </div>
+          ) : null}
+
+          {/* High Confidence ML Signal */}
+          {decisionAnalysis && decisionAnalysis.finalCertainty >= 80 && (
+            <div className="flex items-center gap-2 text-sm text-buy-primary">
+              <div className="w-2 h-2 rounded-full bg-buy-primary pulse-buy" />
+              <span>
+                Sinal forte: {decisionAnalysis.recommendation} 
+                ({decisionAnalysis.finalCertainty}% confiança)
+              </span>
+            </div>
+          )}
+
+          {/* Strong Buy Aggression from ML */}
+          {decisionAnalysis && decisionAnalysis.componentScores.buyAggression >= 80 && (
+            <div className="flex items-center gap-2 text-sm text-buy-primary">
+              <Target className="w-3 h-3" />
+              <span>
+                Alta agressão compradora detectada 
+                ({decisionAnalysis.componentScores.buyAggression}%)
+              </span>
+            </div>
+          )}
+
+          {/* Strong Sell Aggression from ML */}
+          {decisionAnalysis && decisionAnalysis.componentScores.sellAggression >= 80 && (
+            <div className="flex items-center gap-2 text-sm text-sell-primary">
+              <Target className="w-3 h-3" />
+              <span>
+                Alta agressão vendedora detectada 
+                ({decisionAnalysis.componentScores.sellAggression}%)
+              </span>
+            </div>
+          )}
+
+          {/* False Orders Detection */}
+          {decisionAnalysis && decisionAnalysis.componentScores.falseOrdersDetected >= 60 && (
+            <div className="flex items-center gap-2 text-sm text-text-accent">
+              <AlertTriangle className="w-3 h-3" />
+              <span>
+                Ordens falsas detectadas 
+                ({decisionAnalysis.componentScores.falseOrdersDetected}%)
+              </span>
+            </div>
+          )}
+
+          {/* Market Data Based Alerts (Fallback) */}
           {marketData.volatility > 3 && (
             <div className="flex items-center gap-2 text-sm text-sell-primary">
               <div className="w-2 h-2 rounded-full bg-sell-primary pulse-sell" />
-              <span>Alta volatilidade detectada</span>
+              <span>Alta volatilidade detectada ({marketData.volatility.toFixed(1)}%)</span>
             </div>
           )}
           
@@ -192,14 +257,27 @@ export const MarketContext: React.FC<MarketContextProps> = ({ marketData }) => {
           {Math.abs(marketData.orderBookImbalance) > 50 && (
             <div className="flex items-center gap-2 text-sm text-buy-primary">
               <div className="w-2 h-2 rounded-full bg-buy-primary pulse-buy" />
-              <span>Forte desequilíbrio no order book</span>
+              <span>Forte desequilíbrio no order book ({Math.abs(marketData.orderBookImbalance)}%)</span>
             </div>
           )}
           
           {marketData.spread > 10 && (
             <div className="flex items-center gap-2 text-sm text-sell-primary">
               <div className="w-2 h-2 rounded-full bg-sell-primary" />
-              <span>Spread elevado - impacto nos custos</span>
+              <span>Spread elevado - impacto nos custos ({marketData.spread} pts)</span>
+            </div>
+          )}
+
+          {/* No Alerts State */}
+          {!mlEngineError && 
+           !decisionAnalysis && 
+           marketData.volatility <= 3 && 
+           marketData.liquidityLevel !== 'low' && 
+           Math.abs(marketData.orderBookImbalance) <= 50 && 
+           marketData.spread <= 10 && (
+            <div className="flex items-center gap-2 text-sm text-text-secondary">
+              <div className="w-2 h-2 rounded-full bg-text-secondary" />
+              <span>Nenhum alerta no momento - mercado estável</span>
             </div>
           )}
         </div>

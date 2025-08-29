@@ -61,7 +61,11 @@ export const MainDashboardGrid: React.FC<MainDashboardGridProps> = ({
       
       {/* Market Context - 1 column */}
       <aside className="xl:col-span-1" aria-label="Contexto de mercado">
-        <MarketContext marketData={marketData} />
+        <MarketContext 
+          marketData={marketData}
+          decisionAnalysis={decisionAnalysis}
+          mlEngineError={mlEngineError}
+        />
       </aside>
       
       {/* Trading Log - Full width */}
