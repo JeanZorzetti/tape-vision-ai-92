@@ -13,6 +13,7 @@
     "start": "node src/server-production.js",
     "start:prod": "NODE_ENV=production node src/server-production.js",
     "start:auth": "node src/server-auth.js",
+    "start:minimal": "node src/server-minimal-auth.js",
     "start:full": "node dist/server.js",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
