@@ -33,8 +33,8 @@ RUN echo '{ \
 # Install dependencies including JWT
 RUN npm install --only=production && npm cache clean --force
 
-# Copy source directory with authentication server
-COPY src/ ./src/
+# Copy the minimal authentication server directly
+COPY ./src/server-minimal-auth.js ./src/server-minimal-auth.js
 
 # Copy environment file
 COPY .env.example ./.env
