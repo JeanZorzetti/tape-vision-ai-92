@@ -225,23 +225,59 @@ app.get('/api/trading/status', authenticateToken, (req, res) => {
 });
 
 app.get('/api/trading/ml/predictions', authenticateToken, (req, res) => {
-  res.json([{
-    signal: Math.random() > 0.6 ? 'BUY' : Math.random() > 0.3 ? 'SELL' : 'HOLD',
-    confidence: 0.75 + Math.random() * 0.25,
-    reasoning: 'Strong upward momentum detected with volume confirmation',
-    stopLoss: 4575.50,
-    target: 4588.75,
-    riskReward: 1.8,
+  // Formato que o Frontend espera baseado nos logs
+  const recommendation = Math.random() > 0.6 ? 'ENTRAR' : Math.random() > 0.3 ? 'AGUARDAR' : 'SAIR';
+  const certainty = Math.floor(Math.random() * 30) + 70;
+  
+  res.json({
+    recommendation: recommendation,
+    finalCertainty: certainty,
+    entryReason: "Análise ML ativa",
+    nextAction: `${recommendation.toLowerCase()} recomendada. Target: R$ 4590.00, Stop: R$ 4575.00`,
+    componentScores: {
+      buyAggression: Math.floor(Math.random() * 100),
+      sellAggression: Math.floor(Math.random() * 50),
+      liquidityAbsorption: Math.floor(Math.random() * 100),
+      falseOrdersDetected: Math.floor(Math.random() * 30),
+      flowMomentum: Math.floor(Math.random() * 100),
+      institutionalActivity: Math.floor(Math.random() * 100),
+      supportResistance: Math.floor(Math.random() * 100)
+    },
+    variablesAnalyzed: [
+      {
+        name: "Volume Profile",
+        value: Math.floor(Math.random() * 100),
+        impact: "high",
+        className: "positive"
+      },
+      {
+        name: "Order Flow",
+        value: Math.floor(Math.random() * 100),
+        impact: "medium",
+        className: "neutral"
+      },
+      {
+        name: "Institutional Flow",
+        value: Math.floor(Math.random() * 100),
+        impact: "high",
+        className: "positive"
+      },
+      {
+        name: "Market Microstructure",
+        value: Math.floor(Math.random() * 100),
+        impact: "low",
+        className: "negative"
+      }
+    ],
+    // Mantém compatibilidade com formato antigo
+    signal: recommendation === 'ENTRAR' ? 'BUY' : recommendation === 'SAIR' ? 'SELL' : 'HOLD',
+    confidence: certainty / 100,
     timestamp: new Date().toISOString(),
     patterns: [
       { name: 'Bullish Breakout', confidence: 0.87 },
       { name: 'Volume Surge', confidence: 0.82 }
-    ],
-    marketRegime: 'trending',
-    modelVersion: '1.0',
-    featuresCount: 42,
-    responseTime: Math.floor(Math.random() * 200) + 100
-  }]);
+    ]
+  });
 });
 
 // Catch all
