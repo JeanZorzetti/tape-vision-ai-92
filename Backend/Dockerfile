@@ -14,26 +14,27 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package.json ./
 
-# Create minimal package.json with only essential dependencies
+# Create package.json with authentication server dependencies
 RUN echo '{ \
   "name": "tape-vision-trading-backend", \
   "version": "1.0.0", \
-  "main": "server-minimal.js", \
+  "main": "src/server-minimal-auth.js", \
   "scripts": { \
-    "start": "node server-minimal.js" \
+    "start": "node src/server-minimal-auth.js" \
   }, \
   "dependencies": { \
     "express": "^4.21.2", \
     "cors": "^2.8.5", \
-    "dotenv": "^16.6.1" \
+    "dotenv": "^16.6.1", \
+    "jsonwebtoken": "^9.0.2" \
   } \
 }' > package.json
 
-# Install only minimal dependencies
+# Install dependencies including JWT
 RUN npm install --only=production && npm cache clean --force
 
-# Copy the minimal server (JavaScript version)
-COPY server-minimal.js ./
+# Copy source directory with authentication server
+COPY src/ ./src/
 
 # Copy environment file
 COPY .env.example ./.env
@@ -50,10 +51,15 @@ USER nodejs
 # Expose port
 EXPOSE 3001
 
-# Health check
+# Health check for authentication server
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', (res) => { \
-    if (res.statusCode === 200) { process.exit(0) } else { process.exit(1) } \
+    let data = ''; res.on('data', chunk => data += chunk); \
+    res.on('end', () => { \
+      if (res.statusCode === 200 && data.includes('MINIMAL AUTH SERVER')) { \
+        process.exit(0) \
+      } else { process.exit(1) } \
+    }) \
   }).on('error', () => process.exit(1))"
 
 # Use dumb-init to handle signals properly
