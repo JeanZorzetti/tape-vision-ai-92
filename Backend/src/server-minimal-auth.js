@@ -208,6 +208,56 @@ app.get('/api/trading/ml/predictions', authenticateToken, (req, res) => {
   }]);
 });
 
+// Services API endpoints (mock for production)
+app.get('/api/ml/predictions/:symbol', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    data: [{
+      symbol: req.params.symbol,
+      signal: 'BUY',
+      confidence: 0.87,
+      price: 98.45,
+      target: 99.20,
+      stopLoss: 97.80,
+      timestamp: new Date().toISOString()
+    }],
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/ml/health', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      status: 'healthy',
+      modelVersion: '1.2.1',
+      lastUpdate: new Date().toISOString(),
+      accuracy: 0.87,
+      uptime: '99.9%'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/services/health', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      overall: 'healthy',
+      services: {
+        MLService: { status: 'healthy', latency: 45 },
+        UserService: { status: 'healthy', latency: 12 },
+        RiskService: { status: 'healthy', latency: 8 },
+        MarketDataService: { status: 'healthy', latency: 23 },
+        PositionService: { status: 'healthy', latency: 15 },
+        NotificationService: { status: 'healthy', latency: 18 },
+        LoggingService: { status: 'healthy', latency: 6 }
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Catch all
 app.use((req, res) => {
   res.status(404).json({

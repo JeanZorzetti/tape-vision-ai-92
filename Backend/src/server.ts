@@ -19,6 +19,13 @@ import { TradingEngine } from './core/trading/TradingEngine';
 import { createTradingRoutes } from './routes/tradingRoutes';
 import { DatabaseManager } from './database/DatabaseManager';
 import { NelogicaService } from './services/nelogica/NelogicaService';
+
+// Import services
+import { 
+  initializeServices as initAppServices,
+  serviceInstances,
+  Services
+} from './services';
 import { 
   TradingConfig,
   MarketData,
@@ -223,6 +230,14 @@ class TradingServer {
     
     this.tradingEngine = new TradingEngine(tradingConfig, this.logger);
     
+    // Initialize application services (ML, User, Risk, etc.)
+    this.logger.info('Initializing application services...');
+    const serviceInitResult = await initAppServices();
+    if (!serviceInitResult.success) {
+      throw new Error(`Failed to initialize services: ${serviceInitResult.error}`);
+    }
+    this.logger.info(`Services initialized: ${serviceInitResult.services.join(', ')}`);
+    
     // Connect services
     await this.connectServices();
   }
@@ -262,8 +277,23 @@ class TradingServer {
     });
     
     // Connect Nelogica service to trading engine
-    this.nelogicaService.on('market-data', (data: MarketData) => {
+    this.nelogicaService.on('market-data', async (data: MarketData) => {
+      // Process market data through trading engine
       this.tradingEngine.processMarketData(data);
+      
+      // Also send to market data service for analysis
+      try {
+        await serviceInstances.marketDataService.processMarketData({
+          symbol: data.symbol,
+          price: data.price,
+          volume: data.volume,
+          timestamp: data.timestamp,
+          orderBook: data.orderBook,
+          metadata: data
+        });
+      } catch (error) {
+        this.logger.error('Failed to process market data in service', error);
+      }
     });
     
     this.nelogicaService.on('order-book', (orderBook) => {
@@ -273,6 +303,66 @@ class TradingServer {
     this.nelogicaService.on('connection-status', (status) => {
       this.logger.info('Nelogica connection status changed', status);
     });
+    
+    // Connect trading engine to services
+    this.tradingEngine.on('trade-executed', async (data) => {
+      try {
+        // Log the trade
+        await serviceInstances.loggingService.logTrade(
+          data.userId || 'system',
+          'TRADE_EXECUTED',
+          data.trade
+        );
+        
+        // Update position
+        await serviceInstances.positionService.updatePosition(
+          data.trade.userId || 'system',
+          data.trade
+        );
+        
+        // Check risk limits
+        const riskCheck = await serviceInstances.riskService.checkTradeRisk(
+          data.trade.userId || 'system',
+          data.trade
+        );
+        
+        if (!riskCheck.approved) {
+          this.logger.warn('Trade executed but failed risk check', riskCheck);
+          await serviceInstances.notificationService.sendNotification(
+            data.trade.userId || 'system',
+            'RISK_WARNING',
+            `Trade executed but exceeded risk limits: ${riskCheck.reasons.join(', ')}`
+          );
+        }
+        
+        // Broadcast via WebSocket
+        if (this.webSocketManager) {
+          this.webSocketManager.broadcastTrade(data.trade);
+        }
+      } catch (error) {
+        this.logger.error('Failed to process trade execution through services', error);
+      }
+    });
+    
+    // Connect ML service predictions to trading engine
+    try {
+      // This could be enhanced to periodically fetch ML predictions
+      // and feed them to the trading engine
+      setInterval(async () => {
+        try {
+          const predictions = await serviceInstances.mlService.getPredictions('WDO');
+          if (predictions.length > 0) {
+            // Process ML predictions in trading engine
+            // This would need to be implemented in TradingEngine
+            this.logger.debug('ML predictions received', { count: predictions.length });
+          }
+        } catch (error) {
+          this.logger.debug('No ML predictions available', error);
+        }
+      }, 30000); // Every 30 seconds
+    } catch (error) {
+      this.logger.error('Failed to setup ML predictions interval', error);
+    }
   }
 
   private setupRoutes(): void {
@@ -303,6 +393,9 @@ class TradingServer {
     
     this.app.use('/api/trading', createTradingRoutes(controller, this.logger));
     
+    // Services API endpoints
+    this.setupServiceRoutes();
+    
     // Static files (if any)
     this.app.use('/static', express.static(path.join(__dirname, '../static')));
     
@@ -314,6 +407,141 @@ class TradingServer {
         timestamp: Date.now(),
         requestId: req.headers['x-request-id'] || 'unknown'
       });
+    });
+  }
+
+  private setupServiceRoutes(): void {
+    // ML Service endpoints
+    this.app.get('/api/ml/predictions/:symbol', async (req, res) => {
+      try {
+        const predictions = await serviceInstances.mlService.getPredictions(req.params.symbol);
+        res.json({
+          success: true,
+          data: predictions,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get ML predictions', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get predictions',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    this.app.get('/api/ml/health', async (req, res) => {
+      try {
+        const health = await serviceInstances.mlService.getModelHealth();
+        res.json({
+          success: true,
+          data: health,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get ML health', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get ML health',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // User Service endpoints
+    this.app.get('/api/users/stats', async (req, res) => {
+      try {
+        const stats = await serviceInstances.userService.getUserStats();
+        res.json({
+          success: true,
+          data: stats,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get user stats', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get user stats',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Risk Service endpoints
+    this.app.get('/api/risk/status/:userId', async (req, res) => {
+      try {
+        const riskStatus = await serviceInstances.riskService.getRiskStatus(req.params.userId);
+        res.json({
+          success: true,
+          data: riskStatus,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get risk status', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get risk status',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Position Service endpoints
+    this.app.get('/api/positions/:userId', async (req, res) => {
+      try {
+        const positions = await serviceInstances.positionService.getPositions(req.params.userId);
+        res.json({
+          success: true,
+          data: positions,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get positions', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get positions',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Market Data Service endpoints
+    this.app.get('/api/market/:symbol', async (req, res) => {
+      try {
+        const marketData = await serviceInstances.marketDataService.getMarketData(req.params.symbol);
+        res.json({
+          success: true,
+          data: marketData,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to get market data', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to get market data',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Services health check
+    this.app.get('/api/services/health', async (req, res) => {
+      try {
+        const { checkServicesHealth } = await import('./services');
+        const health = await checkServicesHealth();
+        res.json({
+          success: true,
+          data: health,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Failed to check services health', error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to check services health',
+          timestamp: new Date().toISOString()
+        });
+      }
     });
   }
 
