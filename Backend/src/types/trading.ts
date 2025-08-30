@@ -329,3 +329,148 @@ export class ValidationError extends TradingError {
     this.name = 'ValidationError';
   }
 }
+
+// Services Types - Added for new architecture
+export interface ServiceHealth {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  latency?: number;
+  error?: string;
+  lastCheck?: string;
+}
+
+export interface ServicesHealthCheck {
+  overall: 'healthy' | 'degraded' | 'unhealthy';
+  services: Record<string, ServiceHealth>;
+  timestamp: string;
+}
+
+export interface MLPrediction {
+  id?: string;
+  symbol: string;
+  signal: 'BUY' | 'SELL' | 'HOLD';
+  confidence: number;
+  reasoning: string;
+  targetPrice: number;
+  stopLossPrice: number;
+  entryPrice: number;
+  riskRewardRatio: number;
+  timestamp: string;
+  modelVersion?: string;
+  features?: Record<string, any>;
+  patterns?: PatternMatch[];
+  marketRegime?: string;
+}
+
+export interface RiskCheck {
+  approved: boolean;
+  reasons: string[];
+  riskScore: number;
+  maxAllowedSize?: number;
+  recommendedStopLoss?: number;
+  warnings?: string[];
+}
+
+export interface RiskStatus {
+  userId: string;
+  currentExposure: number;
+  maxExposure: number;
+  dailyPnL: number;
+  maxDailyLoss: number;
+  openPositions: number;
+  maxPositions: number;
+  riskScore: number;
+  status: 'SAFE' | 'WARNING' | 'DANGER';
+  circuitBreaker: boolean;
+  lastUpdate: string;
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalTrades: number;
+  totalVolume: number;
+  avgSessionLength: number;
+  topTraders: Array<{
+    userId: string;
+    username: string;
+    pnl: number;
+    winRate: number;
+    trades: number;
+  }>;
+  dailyStats: {
+    date: string;
+    trades: number;
+    volume: number;
+    activeUsers: number;
+  }[];
+}
+
+export interface LogEntry {
+  id?: string;
+  timestamp: Date;
+  level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TRADE';
+  message: string;
+  context?: string;
+  userId?: string;
+  metadata?: any;
+}
+
+export interface NotificationChannel {
+  type: 'EMAIL' | 'PUSH' | 'SMS' | 'WEBHOOK' | 'IN_APP';
+  enabled: boolean;
+  config: Record<string, any>;
+}
+
+export interface NotificationPreferences {
+  userId: string;
+  channels: NotificationChannel[];
+  tradeAlerts: boolean;
+  riskAlerts: boolean;
+  systemAlerts: boolean;
+  mlAlerts: boolean;
+}
+
+export interface PositionUpdate {
+  userId: string;
+  positionId?: string;
+  symbol: string;
+  side: 'long' | 'short';
+  size: number;
+  entryPrice: number;
+  currentPrice: number;
+  pnl: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  timestamp: string;
+}
+
+export interface MarketDataUpdate {
+  symbol: string;
+  price: number;
+  volume: number;
+  timestamp: Date;
+  orderBook?: OrderBook;
+  metadata?: any;
+}
+
+export interface MLModelHealth {
+  modelId: string;
+  version: string;
+  status: 'ONLINE' | 'OFFLINE' | 'TRAINING' | 'ERROR';
+  accuracy: number;
+  lastUpdate: string;
+  uptime: number;
+  predictionsToday: number;
+  avgResponseTime: number;
+  errorRate: number;
+}
+
+// Enhanced Trade Entry for services
+export interface EnhancedTradeEntry extends TradeEntry {
+  userId?: string;
+  riskCheck?: RiskCheck;
+  mlPrediction?: MLPrediction;
+  positionUpdate?: PositionUpdate;
+  notifications?: string[];
+  serviceErrors?: string[];
+}
