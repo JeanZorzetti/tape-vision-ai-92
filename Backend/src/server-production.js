@@ -119,7 +119,19 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     message: 'Tape Vision AI Trading Backend - Production',
     environment: process.env.NODE_ENV || 'production',
-    version: '1.0.0'
+    version: '1.0.0',
+    server: 'PRODUCTION-SERVER-UPDATED'
+  });
+});
+
+// Test route to verify deployment
+app.get('/api/test/deployment', (req, res) => {
+  res.json({
+    success: true,
+    message: 'PRODUCTION SERVER IS WORKING!',
+    timestamp: new Date().toISOString(),
+    routes: ['/api/auth/login', '/api/auth/logout', '/api/trading/ml/predictions'],
+    server: 'production-server.js'
   });
 });
 
