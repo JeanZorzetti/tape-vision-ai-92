@@ -191,7 +191,20 @@ app.get('/api/trading/ml/predictions', authenticateToken, (req, res) => {
   res.json([{
     signal: 'BUY',
     confidence: 0.85,
-    timestamp: new Date().toISOString()
+    reasoning: 'Strong bullish momentum detected with high volume confirmation',
+    stopLoss: 4575.50,
+    target: 4585.75,
+    riskReward: 2.1,
+    timestamp: new Date().toISOString(),
+    responseTime: 145,
+    modelVersion: '1.2.1',
+    featuresCount: 47,
+    patterns: [
+      { name: 'Breakout Pattern', confidence: 0.85 },
+      { name: 'Volume Surge', confidence: 0.92 },
+      { name: 'Support Hold', confidence: 0.78 }
+    ],
+    marketRegime: 'trending'
   }]);
 });
 

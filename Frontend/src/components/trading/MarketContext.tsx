@@ -36,6 +36,8 @@ export const MarketContext: React.FC<MarketContextProps> = ({
         return { text: 'Fechamento', className: 'status-warning' };
       case 'after-hours':
         return { text: 'Após Fechamento', className: 'status-danger' };
+      default:
+        return { text: 'Mercado', className: 'status-active' };
     }
   };
 
