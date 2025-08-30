@@ -1,6 +1,7 @@
 /**
  * Trading API Routes
  * RESTful endpoints for trading operations and data access
+ * Integrated with Services Architecture
  */
 
 import { Router } from 'express';
@@ -17,6 +18,9 @@ import {
   TradingSession,
   PaginatedResponse
 } from '@/types/trading';
+
+// Import services
+import { serviceInstances } from '../services';
 
 interface TradingController {
   getMarketData(): Promise<MarketData>;
@@ -195,7 +199,7 @@ export function createTradingRoutes(controller: TradingController, logger: Logge
 
   /**
    * POST /api/trading/execute
-   * Execute a trade
+   * Execute a trade (enhanced with services)
    */
   router.post('/execute',
     [
@@ -203,12 +207,60 @@ export function createTradingRoutes(controller: TradingController, logger: Logge
       body('symbol').isString().isLength({ min: 2, max: 10 }).withMessage('Invalid symbol'),
       body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
       body('price').optional().isFloat({ min: 0 }).withMessage('Invalid price'),
-      body('reason').isString().isLength({ min: 5, max: 200 }).withMessage('Reason must be 5-200 characters')
+      body('reason').isString().isLength({ min: 5, max: 200 }).withMessage('Reason must be 5-200 characters'),
+      body('userId').optional().isString().withMessage('Invalid user ID')
     ],
     handleValidationErrors,
     async (req: any, res: any) => {
       try {
-        const trade = await controller.executeTrade(req.body);
+        const userId = req.body.userId || 'system';
+        
+        // Pre-execution risk check
+        const riskCheck = await serviceInstances.riskService.checkTradeRisk(userId, req.body);
+        
+        if (!riskCheck.approved) {
+          logger.warn('Trade rejected by risk service', { 
+            userId, 
+            trade: req.body, 
+            reasons: riskCheck.reasons 
+          });
+          
+          // Send risk warning notification
+          await serviceInstances.notificationService.sendNotification(
+            userId,
+            'RISK_REJECTION',
+            `Trade rejected: ${riskCheck.reasons.join(', ')}`
+          );
+          
+          return sendResponse(res, undefined, `Trade rejected by risk management: ${riskCheck.reasons.join(', ')}`);
+        }
+        
+        // Execute trade through controller
+        const trade = await controller.executeTrade({
+          ...req.body,
+          userId
+        });
+        
+        // Post-execution services integration
+        try {
+          // Log the trade
+          await serviceInstances.loggingService.logTrade(userId, 'TRADE_EXECUTED', trade);
+          
+          // Update position
+          await serviceInstances.positionService.updatePosition(userId, trade);
+          
+          // Send success notification
+          await serviceInstances.notificationService.sendNotification(
+            userId,
+            'TRADE_EXECUTED',
+            `Trade executed successfully: ${trade.action} ${trade.quantity} ${trade.symbol} @ ${trade.price}`
+          );
+          
+        } catch (serviceError) {
+          logger.error('Error in post-execution services', serviceError);
+          // Don't fail the trade, just log the service error
+        }
+        
         sendResponse(res, trade);
       } catch (error) {
         logger.error('Error executing trade', error);
@@ -316,6 +368,109 @@ export function createTradingRoutes(controller: TradingController, logger: Logge
       }
     }
   );
+
+  /**
+   * GET /api/trading/ml/predictions
+   * Get ML predictions (enhanced with services)
+   */
+  router.get('/ml/predictions', async (req, res) => {
+    try {
+      const predictions = await serviceInstances.mlService.getPredictions('WDO');
+      sendResponse(res, predictions);
+    } catch (error) {
+      logger.error('Error getting ML predictions', error);
+      // Fallback to controller if service fails
+      try {
+        const fallbackPredictions = [{
+          signal: 'HOLD',
+          confidence: 0.5,
+          reasoning: 'Service temporarily unavailable',
+          stopLoss: 0,
+          target: 0,
+          riskReward: 1.5,
+          timestamp: new Date().toISOString(),
+          responseTime: 0,
+          modelVersion: '1.0.0',
+          featuresCount: 0,
+          patterns: [],
+          marketRegime: 'unknown'
+        }];
+        sendResponse(res, fallbackPredictions);
+      } catch (fallbackError) {
+        sendResponse(res, undefined, 'Failed to get ML predictions');
+      }
+    }
+  });
+
+  /**
+   * GET /api/trading/risk-status
+   * Get current risk status
+   */
+  router.get('/risk-status', async (req, res) => {
+    try {
+      const userId = req.query.userId as string || 'system';
+      const riskStatus = await serviceInstances.riskService.getRiskStatus(userId);
+      sendResponse(res, riskStatus);
+    } catch (error) {
+      logger.error('Error getting risk status', error);
+      sendResponse(res, undefined, 'Failed to get risk status');
+    }
+  });
+
+  /**
+   * GET /api/trading/user-stats
+   * Get user trading statistics
+   */
+  router.get('/user-stats', async (req, res) => {
+    try {
+      const stats = await serviceInstances.userService.getUserStats();
+      sendResponse(res, stats);
+    } catch (error) {
+      logger.error('Error getting user stats', error);
+      sendResponse(res, undefined, 'Failed to get user stats');
+    }
+  });
+
+  /**
+   * POST /api/trading/positions/update
+   * Update position via service (called internally)
+   */
+  router.post('/positions/update',
+    [
+      body('userId').isString().withMessage('User ID is required'),
+      body('trade').isObject().withMessage('Trade object is required')
+    ],
+    handleValidationErrors,
+    async (req: any, res: any) => {
+      try {
+        const { userId, trade } = req.body;
+        await serviceInstances.positionService.updatePosition(userId, trade);
+        
+        // Log the position update
+        await serviceInstances.loggingService.logTrade(userId, 'POSITION_UPDATE', trade);
+        
+        sendResponse(res, { message: 'Position updated successfully' });
+      } catch (error) {
+        logger.error('Error updating position', error);
+        sendResponse(res, undefined, 'Failed to update position');
+      }
+    }
+  );
+
+  /**
+   * GET /api/trading/services/health
+   * Get health status of all trading services
+   */
+  router.get('/services/health', async (req, res) => {
+    try {
+      const { checkServicesHealth } = await import('../services');
+      const health = await checkServicesHealth();
+      sendResponse(res, health);
+    } catch (error) {
+      logger.error('Error checking services health', error);
+      sendResponse(res, undefined, 'Failed to check services health');
+    }
+  });
 
   // Error handling middleware
   router.use((error: any, req: any, res: any, next: any) => {
