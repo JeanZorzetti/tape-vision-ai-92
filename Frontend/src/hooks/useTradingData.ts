@@ -2,9 +2,11 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AIStatus, DecisionAnalysis, MarketData, TradeEntry, ChartDataPoint } from '@/types/trading';
 import { apiService } from '@/lib/api';
 import { useMLEngineData } from './useMLEngineData';
+import { useAuth } from './useAuth';
 
 // Custom hook for trading data management
 export const useTradingData = () => {
+  const { isAuthenticated, canTrade } = useAuth();
   // Use real ML Engine data
   const mlEngineData = useMLEngineData();
   
@@ -48,6 +50,13 @@ export const useTradingData = () => {
 
   // Load trading data from backend
   const loadTradingData = useCallback(async () => {
+    // Only load data if user is authenticated
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -75,6 +84,13 @@ export const useTradingData = () => {
       console.log('[TradingData] Data loaded successfully from backend');
       
     } catch (err) {
+      // Don't show errors if user is not authenticated
+      if (!isAuthenticated) {
+        setIsLoading(false);
+        setError(null);
+        return;
+      }
+
       const errorMessage = err instanceof Error ? err.message : 'Failed to load trading data';
       setError(errorMessage);
       console.error('[TradingData] Error loading data:', err);
@@ -89,17 +105,23 @@ export const useTradingData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  // Refresh data periodically
+  // Refresh data periodically only if authenticated
   useEffect(() => {
-    loadTradingData();
-    
-    // Set up polling every 5 seconds
-    const interval = setInterval(loadTradingData, 5000);
-    
-    return () => clearInterval(interval);
-  }, [loadTradingData]);
+    if (isAuthenticated) {
+      loadTradingData();
+      
+      // Set up polling every 5 seconds
+      const interval = setInterval(loadTradingData, 5000);
+      
+      return () => clearInterval(interval);
+    } else {
+      // Clear data when not authenticated
+      setIsLoading(false);
+      setError(null);
+    }
+  }, [loadTradingData, isAuthenticated]);
 
   const addTradeEntry = useCallback((entry: Omit<TradeEntry, 'id'>) => {
     const newEntry: TradeEntry = {

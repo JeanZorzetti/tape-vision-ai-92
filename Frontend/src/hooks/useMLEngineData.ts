@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DecisionAnalysis } from '@/types/trading';
 import { apiService } from '@/lib/api';
+import { useAuth } from './useAuth';
 
 interface MLEngineResponse {
   signal: 'BUY' | 'SELL' | 'HOLD';
@@ -39,20 +40,24 @@ interface MLEngineStatus {
 // ML Engine communication through Backend middleware
 
 export const useMLEngineData = () => {
+  const { isAuthenticated, canTrade } = useAuth();
   const [decisionAnalysis, setDecisionAnalysis] = useState<DecisionAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchMLAnalysis = useCallback(async () => {
+    // Only fetch if user is authenticated and can trade
+    if (!isAuthenticated || !canTrade()) {
+      setDecisionAnalysis(null);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-
-      // Check if user is authenticated
-      if (!apiService.isAuthenticated()) {
-        throw new Error('Autenticação necessária para acessar ML Engine');
-      }
 
       // Get ML predictions through Backend (protected endpoint)
       const predictions = await apiService.getMLPredictions();
@@ -141,9 +146,12 @@ export const useMLEngineData = () => {
       setError(errorMessage);
       console.error('[MLEngine] Error loading data via Backend:', err);
       
-      // If authentication error, clear and redirect to login
-      if (errorMessage.includes('Authentication') || errorMessage.includes('Autenticação')) {
-        window.dispatchEvent(new CustomEvent('auth:logout'));
+      // Don't show authentication errors if user is not supposed to be authenticated
+      if (!isAuthenticated) {
+        setDecisionAnalysis(null);
+        setError(null);
+        setIsLoading(false);
+        return;
       }
       
       // Set fallback to null instead of mock data
@@ -151,7 +159,7 @@ export const useMLEngineData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAuthenticated, canTrade]);
 
   const generateNextAction = (data: MLEngineResponse): string => {
     const price = 4580.25; // Would come from market data in real scenario
@@ -168,14 +176,21 @@ export const useMLEngineData = () => {
     }
   };
 
-  // Auto-refresh every 10 seconds
+  // Auto-refresh every 10 seconds only if authenticated and can trade
   useEffect(() => {
-    fetchMLAnalysis();
-    
-    const interval = setInterval(fetchMLAnalysis, 10000);
-    
-    return () => clearInterval(interval);
-  }, [fetchMLAnalysis]);
+    if (isAuthenticated && canTrade()) {
+      fetchMLAnalysis();
+      
+      const interval = setInterval(fetchMLAnalysis, 10000);
+      
+      return () => clearInterval(interval);
+    } else {
+      // Clear data when not authenticated
+      setDecisionAnalysis(null);
+      setError(null);
+      setIsLoading(false);
+    }
+  }, [fetchMLAnalysis, isAuthenticated, canTrade]);
 
   const refreshData = useCallback(() => {
     fetchMLAnalysis();
@@ -187,6 +202,8 @@ export const useMLEngineData = () => {
     error,
     lastUpdate,
     refreshData,
-    hasData: decisionAnalysis !== null
+    hasData: decisionAnalysis !== null,
+    isAuthenticated,
+    canTrade: canTrade()
   };
 };
