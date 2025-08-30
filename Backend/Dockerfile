@@ -18,9 +18,9 @@ COPY package.json ./
 RUN echo '{ \
   "name": "tape-vision-trading-backend", \
   "version": "1.0.0", \
-  "main": "src/server-minimal-auth.js", \
+  "main": "server-minimal-auth.js", \
   "scripts": { \
-    "start": "node src/server-minimal-auth.js" \
+    "start": "node server-minimal-auth.js" \
   }, \
   "dependencies": { \
     "express": "^4.21.2", \
@@ -33,8 +33,8 @@ RUN echo '{ \
 # Install dependencies including JWT
 RUN npm install --only=production && npm cache clean --force
 
-# Copy the minimal authentication server directly
-COPY ./src/server-minimal-auth.js ./src/server-minimal-auth.js
+# Copy the minimal authentication server
+COPY server-minimal-auth.js ./
 
 # Copy environment file
 COPY .env.example ./.env
