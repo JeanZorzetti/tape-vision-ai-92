@@ -172,16 +172,53 @@ app.get('/api/auth/profile', authenticateToken, (req, res) => {
   });
 });
 
-// BÁSICAS PARA TRADING (minimais)
+// TRADING STATUS com estrutura completa para o frontend
 app.get('/api/trading/status', authenticateToken, (req, res) => {
+  const marketHours = new Date().getHours();
+  const isMarketOpen = marketHours >= 9 && marketHours <= 17;
+  
   res.json({
     aiStatus: {
-      confidence: 85,
-      status: 'active',
-      lastAnalysis: new Date().toISOString()
+      confidence: Math.floor(Math.random() * 30) + 70,
+      status: isMarketOpen ? 'active' : 'standby',
+      lastAnalysis: new Date().toISOString(),
+      patternsDetected: [
+        'Institutional Flow Detected',
+        'Volume Profile Support'
+      ],
+      marketContext: isMarketOpen ? 
+        'Real-time analysis active' : 
+        'Market closed - analyzing data',
+      entrySignals: Math.floor(Math.random() * 8) + 2,
+      aggressionLevel: Math.random() > 0.6 ? 'high' : 'medium',
+      hiddenLiquidity: Math.random() > 0.7,
+      processingLatency: Math.floor(Math.random() * 50) + 25,
+      memoryUsage: Math.floor(Math.random() * 200) + 400
     },
     marketData: {
-      price: 4580.25,
+      price: 4580.25 + (Math.random() - 0.5) * 15,
+      priceChange: (Math.random() - 0.5) * 8,
+      volume: Math.floor(Math.random() * 50000) + 25000,
+      volatility: Math.random() * 3 + 1,
+      spread: Math.random() * 1.5 + 0.5,
+      sessionTime: new Date().toISOString(),
+      marketPhase: isMarketOpen ? 'regular' : 'closed',
+      liquidityLevel: Math.random() > 0.4 ? 'high' : 'medium',
+      orderBookImbalance: (Math.random() - 0.5) * 80,
+      timestamp: Date.now(),
+      bid: 4579.75,
+      ask: 4580.25,
+      last: 4580.00,
+      high: 4590.50,
+      low: 4570.25,
+      symbol: 'WDO'
+    },
+    systemHealth: {
+      cpu: Math.floor(Math.random() * 40) + 30,
+      memory: Math.floor(Math.random() * 30) + 50,
+      disk: Math.floor(Math.random() * 20) + 70,
+      network: Math.floor(Math.random() * 10) + 85,
+      uptime: process.uptime(),
       timestamp: Date.now()
     }
   });
@@ -189,9 +226,21 @@ app.get('/api/trading/status', authenticateToken, (req, res) => {
 
 app.get('/api/trading/ml/predictions', authenticateToken, (req, res) => {
   res.json([{
-    signal: 'BUY',
-    confidence: 0.85,
-    timestamp: new Date().toISOString()
+    signal: Math.random() > 0.6 ? 'BUY' : Math.random() > 0.3 ? 'SELL' : 'HOLD',
+    confidence: 0.75 + Math.random() * 0.25,
+    reasoning: 'Strong upward momentum detected with volume confirmation',
+    stopLoss: 4575.50,
+    target: 4588.75,
+    riskReward: 1.8,
+    timestamp: new Date().toISOString(),
+    patterns: [
+      { name: 'Bullish Breakout', confidence: 0.87 },
+      { name: 'Volume Surge', confidence: 0.82 }
+    ],
+    marketRegime: 'trending',
+    modelVersion: '1.0',
+    featuresCount: 42,
+    responseTime: Math.floor(Math.random() * 200) + 100
   }]);
 });
 
