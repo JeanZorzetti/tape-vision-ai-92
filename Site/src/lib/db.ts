@@ -4,7 +4,9 @@
 import postgres from 'postgres';
 import type { ReferralChannel } from './channel';
 
-const sql = postgres(process.env.DATABASE_URL ?? '', { ssl: 'require' });
+// TLS mode comes from `sslmode` in the connection string — hardcoding `ssl: 'require'`
+// here overrode it and broke self-hosted Postgres without TLS.
+const sql = postgres(process.env.DATABASE_URL ?? '');
 
 export default sql;
 
