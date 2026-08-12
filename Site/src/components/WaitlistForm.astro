@@ -1,0 +1,179 @@
+---
+// The single primary CTA (FR-005). A native <form method="post"> so the CTA never
+// depends on client JS (FR-007, R10); the inline script below is a progressive
+// enhancement that keeps the visitor on the page instead of navigating to raw JSON,
+// falling back cleanly to the server's redirect-with-state path when JS is disabled.
+import { CONSENT_VERSION } from '../lib/site';
+
+interface Props {
+  sourcePage: string;
+}
+
+const { sourcePage } = Astro.props;
+const renderedAt = Date.now();
+---
+
+<form method="post" action="/api/waitlist" id="waitlist-form" novalidate>
+  <div class="field">
+    <label for="wl-name">Nome</label>
+    <input
+      id="wl-name"
+      name="name"
+      type="text"
+      required
+      minlength="2"
+      maxlength="120"
+      autocomplete="name"
+      aria-describedby="wl-name-error"
+    />
+    <p id="wl-name-error" class="field-error" role="alert" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="wl-email">E-mail</label>
+    <input
+      id="wl-email"
+      name="email"
+      type="email"
+      required
+      maxlength="254"
+      autocomplete="email"
+      aria-describedby="wl-email-error"
+    />
+    <p id="wl-email-error" class="field-error" role="alert" hidden></p>
+  </div>
+
+  <div class="field field-consent">
+    <input id="wl-consent" name="consent" type="checkbox" value="true" required aria-describedby="wl-consent-error" />
+    <label for="wl-consent">
+      Li e aceito a <a href="/privacidade">política de privacidade</a> e autorizo o contato sobre o
+      acesso antecipado.
+    </label>
+    <p id="wl-consent-error" class="field-error" role="alert" hidden></p>
+  </div>
+
+  <!-- Honeypot: CSS-hidden and aria-hidden so screen readers never announce it; a
+       filled value marks the submission automated (FR-016). -->
+  <div class="honeypot" aria-hidden="true">
+    <label for="wl-empresa">Empresa</label>
+    <input id="wl-empresa" name="empresa" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <input type="hidden" name="renderedAt" value={renderedAt} />
+  <input type="hidden" name="sourcePage" value={sourcePage} />
+  <input type="hidden" name="consentVersion" value={CONSENT_VERSION} />
+
+  <button type="submit" class="btn-primary">Quero acesso antecipado</button>
+
+  <p id="waitlist-status" class="status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 32rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .field-consent {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .field-consent label {
+    font-size: 0.9375rem;
+  }
+
+  input[type='text'],
+  input[type='email'] {
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 1rem;
+  }
+
+  .field-error {
+    color: #f87171;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .status {
+    font-size: 0.9375rem;
+    min-height: 1.25rem;
+  }
+</style>
+
+<script>
+  const form = document.getElementById('waitlist-form') as HTMLFormElement | null;
+  const status = document.getElementById('waitlist-status');
+  const fieldErrorEls: Record<string, HTMLElement | null> = {
+    name: document.getElementById('wl-name-error'),
+    email: document.getElementById('wl-email-error'),
+    consent: document.getElementById('wl-consent-error'),
+  };
+
+  function clearErrors() {
+    for (const el of Object.values(fieldErrorEls)) {
+      if (!el) continue;
+      el.hidden = true;
+      el.textContent = '';
+    }
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearErrors();
+    if (status) status.textContent = 'Enviando...';
+
+    const formData = new FormData(form);
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (response.ok && result.ok) {
+        if (status) status.textContent = result.message;
+        form.reset();
+        return;
+      }
+
+      if (response.status === 422 && result.errors) {
+        for (const [field, message] of Object.entries(result.errors)) {
+          const el = fieldErrorEls[field];
+          if (el) {
+            el.hidden = false;
+            el.textContent = String(message);
+          }
+        }
+        if (status) status.textContent = 'Verifique os campos destacados.';
+        return;
+      }
+
+      if (status) status.textContent = result.message ?? 'Não foi possível registrar agora.';
+    } catch {
+      if (status) status.textContent = 'Não foi possível registrar agora. Tente novamente em instantes.';
+    }
+  });
+</script>

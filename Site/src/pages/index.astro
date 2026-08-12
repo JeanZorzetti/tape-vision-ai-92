@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { SITE_ORIGIN, PRODUCT_NAME } from '../lib/site';
+import { graph, organizationNode, websiteNode, webPageNode, softwareApplicationNode } from '../lib/schema';
+
+const concepts = (await getCollection('conceitos', ({ data }) => !data.draft)).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+
+const title = `${PRODUCT_NAME} — leitura de fita para o mini-dólar (WDO) na B3`;
+const description =
+  'Tape Vision AI analisa fluxo de ordens — time & sales, livro de ofertas, absorção e agressão — ' +
+  'para traders de mini-dólar (WDO) na B3. Sem indicadores gráficos. Acesso antecipado disponível.';
+
+const pageURL = new URL('/', SITE_ORIGIN).toString();
+
+const pageGraph = graph([
+  organizationNode(),
+  websiteNode(),
+  webPageNode(pageURL, { name: title, description }),
+  softwareApplicationNode({ description }),
+]);
+---
+
+<Base title={title} description={description} graph={pageGraph}>
+  <section class="hero">
+    <h1>Leitura de fita e fluxo de ordens para o mini-dólar (WDO) na B3</h1>
+    <p class="lead">
+      <strong>Tape Vision AI</strong> lê o mercado como um operador de mesa proprietária lê a fita:
+      pelo <em>fluxo de ordens</em> — time &amp; sales, livro de ofertas, absorção e agressão — não
+      por indicadores gráficos ou médias móveis.
+    </p>
+    <p>
+      É para traders de <strong>mini-dólar (WDO)</strong>, o contrato futuro de dólar negociado na
+      <strong>B3</strong> (a bolsa brasileira), que já operam com base em leitura de fita
+      ("tape reading") e querem uma ferramenta que analise esse fluxo em tempo real — não mais um
+      indicador de gráfico repaginado.
+    </p>
+    <p class="disqualifier">
+      Não é para quem busca sinais automáticos de compra/venda, robôs de "lucro garantido" ou
+      ferramentas baseadas em indicadores técnicos de gráfico — se é isso que você procura, este não
+      é o produto certo para você.
+    </p>
+  </section>
+
+  {
+    concepts.length > 0 && (
+      <section class="concepts">
+        <h2>Conceitos de leitura de fita</h2>
+        <ul>
+          {concepts.map((c) => (
+            <li>
+              <a href={`/conceitos/${c.id}`}>{c.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section slot="cta" class="cta">
+    <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    max-width: 70ch;
+    margin: 0 auto;
+    padding: 3rem 1rem 1rem;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+  }
+
+  .disqualifier {
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+  }
+
+  .cta {
+    max-width: 70ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .concepts {
+    max-width: 70ch;
+    margin: 2rem auto 0;
+    padding: 0 1rem;
+  }
+
+  .concepts ul {
+    padding-left: 1.25rem;
+  }
+</style>

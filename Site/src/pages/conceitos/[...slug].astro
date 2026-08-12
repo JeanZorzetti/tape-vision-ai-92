@@ -1,0 +1,92 @@
+---
+// Long-tail concept pages (US3). Rendered through Base.astro so every SEO/a11y/CTA/
+// disclaimer invariant applies automatically; drafts are excluded from getStaticPaths
+// so they never ship, never appear in the sitemap, and never appear in llms.txt.
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import LastUpdated from '../../components/LastUpdated.astro';
+import { SITE_ORIGIN, PRODUCT_NAME } from '../../lib/site';
+import {
+  graph,
+  organizationNode,
+  websiteNode,
+  webPageNode,
+  articleNode,
+  breadcrumbListNode,
+  faqPageNode,
+} from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('conceitos', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const pageURL = new URL(`/conceitos/${entry.id}`, SITE_ORIGIN).toString();
+const title = `${entry.data.title} · ${PRODUCT_NAME}`;
+const updatedISO = entry.data.updated.toISOString();
+const publishedISO = entry.data.published.toISOString();
+
+const pageGraph = graph([
+  organizationNode(),
+  websiteNode(),
+  webPageNode(pageURL, { name: entry.data.title, description: entry.data.description }),
+  articleNode(pageURL, {
+    headline: entry.data.title,
+    description: entry.data.description,
+    datePublished: publishedISO,
+    dateModified: updatedISO,
+  }),
+  breadcrumbListNode(pageURL, [
+    { name: 'Início', url: `${SITE_ORIGIN}/` },
+    { name: entry.data.title, url: pageURL },
+  ]),
+  faqPageNode(pageURL, [{ question: entry.data.title, answer: entry.data.answer }]),
+]);
+---
+
+<Base title={title} description={entry.data.description} graph={pageGraph} ogType="article">
+  <article class="content">
+    <h1>{entry.data.title}</h1>
+    <LastUpdated date={entry.data.updated} />
+    <div class="prose">
+      <Content />
+    </div>
+    <p class="back-link"><a href="/">&larr; Voltar para a página inicial</a></p>
+  </article>
+
+  <section slot="cta" class="cta">
+    <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+  </section>
+</Base>
+
+<style>
+  .content {
+    max-width: 70ch;
+    margin: 0 auto;
+    padding: 3rem 1rem 1rem;
+  }
+
+  .prose {
+    margin-top: 1.5rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2rem;
+  }
+
+  .back-link {
+    margin-top: 2rem;
+  }
+
+  .cta {
+    max-width: 70ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+</style>

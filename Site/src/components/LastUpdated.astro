@@ -1,0 +1,25 @@
+---
+// Renders "Atualizado em {date}" from the same date that feeds Article.dateModified,
+// so the visible date and the structured data can never disagree (FR-012).
+interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+
+const formatted = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(date);
+---
+
+<p class="last-updated">Atualizado em {formatted}</p>
+
+<style>
+  .last-updated {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import { PRODUCT_NAME } from '../lib/site';
+
+const title = `Página não encontrada · ${PRODUCT_NAME}`;
+const description = 'A página que você procura não existe ou foi movida.';
+---
+
+<Base title={title} description={description}>
+  <section class="content">
+    <h1>Página não encontrada</h1>
+    <p>A página que você procura não existe ou foi movida.</p>
+    <p><a href="/">Voltar para a página inicial</a></p>
+  </section>
+
+  <section slot="cta" class="cta">
+    <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+  </section>
+</Base>
+
+<style>
+  .content {
+    max-width: 60ch;
+    margin: 0 auto;
+    padding: 4rem 1rem;
+    text-align: center;
+  }
+
+  .cta {
+    max-width: 60ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+</style>

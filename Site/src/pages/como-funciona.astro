@@ -1,0 +1,132 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { SITE_ORIGIN, PRODUCT_NAME } from '../lib/site';
+import {
+  graph,
+  organizationNode,
+  websiteNode,
+  webPageNode,
+  softwareApplicationNode,
+} from '../lib/schema';
+
+const concepts = (await getCollection('conceitos', ({ data }) => !data.draft)).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+
+const title = `Como funciona · ${PRODUCT_NAME}`;
+const description =
+  'Como o Tape Vision AI analisa fluxo de ordens — time & sales, livro de ofertas, absorção e ' +
+  'agressão — no mini-dólar (WDO) da B3, sem depender de indicadores de gráfico.';
+
+const pageURL = new URL('/como-funciona', SITE_ORIGIN).toString();
+
+const pageGraph = graph([
+  organizationNode(),
+  websiteNode(),
+  webPageNode(pageURL, { name: title, description }),
+  softwareApplicationNode({ description }),
+]);
+---
+
+<Base title={title} description={description} graph={pageGraph}>
+  <article class="content">
+    <h1>Como funciona</h1>
+
+    <p class="lead">
+      O Tape Vision AI é uma ferramenta de <strong>leitura de fita</strong> ("tape reading"): a
+      técnica de interpretar o comportamento do mercado observando as negociações executadas e o
+      livro de ofertas em tempo real, em vez de olhar médias móveis ou outros indicadores
+      desenhados sobre o gráfico de preço.
+    </p>
+
+    <h2>O que é fluxo de ordens?</h2>
+    <p>
+      Fluxo de ordens ("order flow") é o registro de quem está comprando e quem está vendendo, e com
+      que agressividade, a cada instante. Em vez de olhar para trás com um indicador atrasado, o
+      fluxo de ordens mostra a intenção dos participantes do mercado no momento em que ela acontece.
+    </p>
+
+    <h2>Quais sinais o sistema observa</h2>
+    <ul>
+      <li>
+        <strong>Time &amp; sales</strong>: a sequência de negócios executados — preço, volume e
+        quem foi o agressor (comprador ou vendedor).
+      </li>
+      <li>
+        <strong>Livro de ofertas</strong> ("order book"): as ofertas de compra e venda ainda não
+        executadas, e como elas se movem.
+      </li>
+      <li>
+        <strong>Absorção</strong>: quando um volume grande é negociado em um preço sem que o preço
+        se mova — sinal de que uma ordem grande está "absorvendo" a pressão contrária.
+      </li>
+      <li>
+        <strong>Agressão</strong>: a intensidade com que compradores ou vendedores estão "batendo"
+        contra o livro de ofertas para executar a qualquer preço.
+      </li>
+    </ul>
+
+    <h2>Por que mini-dólar (WDO) na B3?</h2>
+    <p>
+      O <strong>WDO</strong> é o contrato futuro de mini-dólar negociado na <strong>B3</strong>
+      (a bolsa de valores brasileira). É um dos contratos mais líquidos do mercado brasileiro, com
+      participação institucional relevante — o que torna o fluxo de ordens especialmente informativo
+      nesse ativo.
+    </p>
+
+    <h2>O que este produto não é</h2>
+    <p>
+      Não é um indicador de gráfico, não gera sinais automáticos de compra/venda para execução sem
+      supervisão, e não promete resultado garantido. É uma ferramenta de análise para apoiar a
+      decisão de quem já opera com leitura de fita.
+    </p>
+  </article>
+
+  {
+    concepts.length > 0 && (
+      <section class="concepts">
+        <h2>Aprofunde-se</h2>
+        <ul>
+          {concepts.map((c) => (
+            <li>
+              <a href={`/conceitos/${c.id}`}>{c.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section slot="cta" class="cta">
+    <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+  </section>
+</Base>
+
+<style>
+  .content {
+    max-width: 70ch;
+    margin: 0 auto;
+    padding: 3rem 1rem 1rem;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+  }
+
+  .cta {
+    max-width: 70ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .concepts {
+    max-width: 70ch;
+    margin: 2rem auto 0;
+    padding: 0 1rem;
+  }
+
+  .concepts ul {
+    padding-left: 1.25rem;
+  }
+</style>

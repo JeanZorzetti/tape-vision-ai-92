@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tapevision.roilabs.com.br/sitemap-index.xml

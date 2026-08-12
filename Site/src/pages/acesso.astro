@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import WaitlistForm from '../components/WaitlistForm.astro';
+import { SITE_ORIGIN, PRODUCT_NAME } from '../lib/site';
+import {
+  graph,
+  organizationNode,
+  websiteNode,
+  webPageNode,
+  softwareApplicationNode,
+} from '../lib/schema';
+
+const title = `Acesso antecipado · ${PRODUCT_NAME}`;
+const description =
+  'Entre na lista de acesso antecipado do Tape Vision AI. Produto em pré-lançamento — sem ' +
+  'cobrança nesta etapa.';
+
+const pageURL = new URL('/acesso', SITE_ORIGIN).toString();
+
+const pageGraph = graph([
+  organizationNode(),
+  websiteNode(),
+  webPageNode(pageURL, { name: title, description }),
+  softwareApplicationNode({ description, availability: 'https://schema.org/PreOrder' }),
+]);
+---
+
+<Base title={title} description={description} graph={pageGraph}>
+  <article class="content">
+    <h1>Acesso antecipado</h1>
+    <p class="lead">
+      O Tape Vision AI está em <strong>pré-lançamento</strong>. Não há cobrança nesta etapa — deixe
+      seu contato para entrar na lista de acesso antecipado e ser avisado assim que novas vagas
+      abrirem.
+    </p>
+
+    <p id="waitlist-status-banner" class="status-banner" role="status" aria-live="polite" hidden></p>
+  </article>
+
+  <section slot="cta" class="cta">
+    <WaitlistForm sourcePage="/acesso" />
+  </section>
+</Base>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const outcome = params.get('waitlist');
+  const banner = document.getElementById('waitlist-status-banner');
+
+  const messages: Record<string, string> = {
+    success: 'Recebemos seu pedido de acesso antecipado.',
+    invalid: 'Não foi possível registrar seu pedido — confira os campos do formulário abaixo.',
+    error: 'Não foi possível registrar agora. Tente novamente em instantes.',
+  };
+
+  if (outcome && banner && messages[outcome]) {
+    banner.textContent = messages[outcome];
+    banner.hidden = false;
+    params.delete('waitlist');
+    const cleanUrl = `${location.pathname}${params.toString() ? `?${params}` : ''}`;
+    history.replaceState(null, '', cleanUrl);
+  }
+</script>
+
+<style>
+  .content {
+    max-width: 70ch;
+    margin: 0 auto;
+    padding: 3rem 1rem 1rem;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+  }
+
+  .status-banner {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .cta {
+    max-width: 32rem;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+// Base layout: every SEO/a11y/CTA/disclaimer invariant lives here so it holds on every
+// page automatically (FR-003, FR-005, FR-006, FR-015) instead of being re-implemented
+// per page.
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Analytics from '@vercel/analytics/astro';
+import { SITE_ORIGIN, PRODUCT_NAME } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+  title: string; // required, <=60 chars, full <title> text (contracts/content-schema.md)
+  description: string; // required, 80-155 chars
+  graph?: object; // full @graph JSON-LD object from lib/schema.ts `graph()`
+  ogImage?: string; // absolute URL
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, graph, ogImage, ogType = 'website' } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, SITE_ORIGIN).toString();
+const resolvedOgImage = ogImage ?? `${SITE_ORIGIN}/og/home.png`;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={resolvedOgImage} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={PRODUCT_NAME} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedOgImage} />
+    {graph && <script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <header>
+      <Nav />
+    </header>
+    <main id="conteudo">
+      <slot />
+      <div class="cta-region">
+        <slot name="cta" />
+      </div>
+    </main>
+    <Footer />
+    <Analytics />
+  </body>
+</html>
+
+<style>
+  .cta-region {
+    padding: 2rem 1rem;
+  }
+</style>

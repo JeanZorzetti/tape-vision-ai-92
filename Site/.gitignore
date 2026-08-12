@@ -1,0 +1,23 @@
+# build
+dist/
+.vercel/
+.astro/
+node_modules/
+
+# env
+.env
+.env.*
+!.env.example
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+.lighthouseci/
+
+# editor / os
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
