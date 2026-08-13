@@ -14,7 +14,7 @@ export interface MarketData {
 
 export interface AIStatus {
   confidence: number;
-  status: 'active' | 'paused' | 'analyzing' | 'error';
+  status: 'active' | 'paused' | 'analyzing' | 'error' | 'standby';
   lastAnalysis: string;
   patternsDetected: string[];
   marketContext: string;

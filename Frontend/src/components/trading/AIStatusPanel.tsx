@@ -6,7 +6,7 @@ import { BackendStatus } from '../dashboard/BackendStatus';
 
 export interface AIStatus {
   confidence: number;
-  status: 'active' | 'paused' | 'error' | 'analyzing';
+  status: 'active' | 'paused' | 'error' | 'analyzing' | 'standby';
   lastAnalysis: string;
   patternsDetected: string[];
   marketContext: string;
@@ -45,6 +45,20 @@ export const AIStatusPanel: React.FC<AIStatusPanelProps> = ({ aiStatus }) => {
           icon: AlertCircle,
           className: 'status-danger',
           text: 'Erro no Sistema'
+        };
+      case 'standby':
+        return {
+          icon: Clock,
+          className: 'status-warning',
+          text: 'Em Espera'
+        };
+      // The backend is free to add states faster than this union tracks them;
+      // an unhandled one used to return undefined and take the dashboard down.
+      default:
+        return {
+          icon: Clock,
+          className: 'status-warning',
+          text: 'Status Desconhecido'
         };
     }
   };
