@@ -48,7 +48,14 @@ LOG_FORMAT=json
 3. Add each variable with Production scope
 4. Redeploy the project
 
-### 3. Easypanel Backend (apitapevision.roilabs.com.br)
+### 3. Backend (apitapevision.roilabs.com.br)
+
+`server-production.js` is a stateless Express app — no WebSocket, no background
+timers — so it runs as a Vercel serverless function (`api/index.js` exports it,
+`vercel.json` rewrites every path to it) or as a normal long-running process on
+Easypanel (`npm start`). Vercel is the shorter path: the DNS record already
+points there, and the certificate is issued as soon as the domain is attached to
+a project.
 
 **Environment Variables to set in Easypanel:**
 
@@ -77,15 +84,19 @@ WS_PORT=3002
 LOG_LEVEL=info
 ```
 
-**Setup Steps:**
-1. Point `apitapevision.roilabs.com.br` at the Easypanel host (an A record — it
-   currently resolves to Vercel, which serves no API and has no certificate for it)
-2. Go to Easypanel Dashboard → Your Backend Service
-3. Navigate to Environment Variables section
-4. Add each variable
-5. Deploy `server-production.js` as main entry point
-6. Seed the user table once: `ADMIN_EMAIL=... ADMIN_PASSWORD=... ML_ENGINE_PASSWORD=... npm run db:init`
-7. Restart the service
+**Setup Steps (Vercel):**
+1. New Vercel project with `Backend/` as the root directory
+2. Attach the domain `apitapevision.roilabs.com.br` — the DNS record already
+   points at Vercel, so the certificate is issued once a project claims it
+3. Add the environment variables above (Production scope)
+4. Deploy
+
+**Setup Steps (Easypanel, alternative):**
+1. Point `apitapevision.roilabs.com.br` at the Easypanel host with an A record
+2. Add the environment variables, deploy `src/server-production.js` as entry point
+
+**Seed the user table once** (from a machine that reaches Postgres):
+`ADMIN_EMAIL=... ADMIN_PASSWORD=... ML_ENGINE_PASSWORD=... npm run db:init`
 
 Verify the store with `node scripts/check-auth.js` — it creates a throwaway
 account, exercises every auth branch, and deletes it.

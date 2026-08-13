@@ -9,7 +9,7 @@
  * (node-pg-migrate, Prisma) when there is a second migration to order.
  */
 require('dotenv').config();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { sql } = require('../src/db');
 
 // The login screen publishes the demo password, so it is not a secret. The admin

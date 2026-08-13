@@ -486,19 +486,26 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('='.repeat(60));
-  console.log('🚀 TAPE VISION AI TRADING API - PRODUCTION');
-  console.log('='.repeat(60));
-  console.log(`📡 Server running on: http://0.0.0.0:${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'production'}`);
-  console.log(`🎯 Frontend URL: ${FRONTEND_URL}`);
-  console.log(`🤖 ML Engine URL: ${ML_ENGINE_URL}`);
-  console.log('🗄️  User store: Postgres (app_user)');
-  console.log('');
-  console.log('🎯 Ready for production trading operations!');
-  console.log('='.repeat(60));
-});
+// Bind a port only when run directly. Under serverless the platform imports the
+// app and drives it per request — calling listen() there leaks a dead handle.
+if (require.main === module) {
+  startServer();
+}
+
+function startServer() {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log('='.repeat(60));
+    console.log('🚀 TAPE VISION AI TRADING API - PRODUCTION');
+    console.log('='.repeat(60));
+    console.log(`📡 Server running on: http://0.0.0.0:${PORT}`);
+    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`🎯 Frontend URL: ${FRONTEND_URL}`);
+    console.log(`🤖 ML Engine URL: ${ML_ENGINE_URL}`);
+    console.log('🗄️  User store: Postgres (app_user)');
+    console.log('');
+    console.log('🎯 Ready for production trading operations!');
+    console.log('='.repeat(60));
+  });
+}
 
 module.exports = app;

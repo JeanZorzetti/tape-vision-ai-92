@@ -5,7 +5,9 @@
  * with, which kept passwords in plaintext and lost every change on restart.
  */
 const postgres = require('postgres');
-const bcrypt = require('bcrypt');
+// bcryptjs, not bcrypt: the native build has no prebuilt binary on every runtime
+// we deploy to, and the hash format is identical either way.
+const bcrypt = require('bcryptjs');
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required — the user store lives in Postgres');
@@ -13,7 +15,11 @@ if (!process.env.DATABASE_URL) {
 
 // TLS mode comes from `sslmode` in the connection string. Hardcoding `ssl` here
 // overrides it and breaks the self-hosted Postgres (same trap as Site/src/lib/db.ts).
-const sql = postgres(process.env.DATABASE_URL);
+//
+// One connection per instance: serverless spawns an instance per concurrent
+// request, and a pool each would exhaust Postgres' connection limit long before
+// the traffic justified it.
+const sql = postgres(process.env.DATABASE_URL, { max: 1, idle_timeout: 20 });
 
 // A wrong email and a wrong password must cost the same time, otherwise the
 // response time tells an attacker which accounts exist.

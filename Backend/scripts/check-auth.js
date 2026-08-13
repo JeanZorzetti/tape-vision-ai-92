@@ -7,7 +7,7 @@
  */
 require('dotenv').config();
 const assert = require('assert');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { sql, authenticate, findUserById } = require('../src/db');
 
 const EMAIL = 'selfcheck@tapevision.local';
