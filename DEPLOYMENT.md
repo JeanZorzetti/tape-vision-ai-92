@@ -95,6 +95,17 @@ LOG_LEVEL=info
 1. Point `apitapevision.roilabs.com.br` at the Easypanel host with an A record
 2. Add the environment variables, deploy `src/server-production.js` as entry point
 
+**Dado de mercado — leia antes de subir.** Não existe feed real: a fonte planejada é
+o agente local Windows (ProfitDLL), ainda não construído. Todo endpoint de
+`/api/trading/*` que produzia preço, P&L ou confirmação de ordem está atrás de
+`requireFeed` e responde `503 NO_MARKET_FEED`. Isso é intencional — a alternativa
+era mostrar número inventado para usuário real.
+
+- `TAPE_MOCK_DATA=true` religa as fixtures **apenas para trabalho de UI local**.
+- Com `NODE_ENV=production`, essa flag faz o processo abortar no boot (exit 1).
+- Verifique com `node scripts/check-feed-gate.js` — sobe o servidor em porta
+  descartável e confirma os dois lados do contrato.
+
 **Seed the user table once** (from a machine that reaches Postgres):
 `ADMIN_EMAIL=... ADMIN_PASSWORD=... ML_ENGINE_PASSWORD=... npm run db:init`
 

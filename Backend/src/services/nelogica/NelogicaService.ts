@@ -628,27 +628,14 @@ export class NelogicaService extends EventEmitter {
 
   // Getters
   public getCurrentMarketData(): MarketData {
+    // ponytail: antes isto devolvia preço inventado com Math.random() quando não havia
+    // conexão, então o sistema inteiro parecia funcionar 100% desconectado. Lançar é o
+    // comportamento honesto — todos os callers já tratam o erro. Não substituir por
+    // fixture: a fonte real de dado é o agente local (ProfitDLL), ainda não construído.
     if (!this.currentMarketData) {
-      // Return mock data if no real data available
-      return {
-        price: 5980 + Math.random() * 20 - 10,
-        priceChange: Math.random() * 4 - 2,
-        volume: Math.floor(Math.random() * 2000) + 1000,
-        volatility: 1.0 + Math.random(),
-        spread: 0.25,
-        sessionTime: new Date().toLocaleTimeString('pt-BR'),
-        marketPhase: 'open',
-        liquidityLevel: 'medium',
-        orderBookImbalance: Math.random() * 20 - 10,
-        timestamp: Date.now(),
-        bid: 5979.75,
-        ask: 5980.00,
-        last: 5979.90,
-        high: 5985.50,
-        low: 5975.25
-      };
+      throw new NelogicaError('Sem dado de mercado: nenhuma conexão Nelogica ativa');
     }
-    
+
     return this.currentMarketData;
   }
 
