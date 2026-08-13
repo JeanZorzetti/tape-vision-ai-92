@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import TapePanel from '../components/TapePanel.astro';
 import { SITE_ORIGIN, PRODUCT_NAME } from '../lib/site';
 import { graph, organizationNode, websiteNode, webPageNode, softwareApplicationNode } from '../lib/schema';
 
@@ -21,78 +22,233 @@ const pageGraph = graph([
   webPageNode(pageURL, { name: title, description }),
   softwareApplicationNode({ description }),
 ]);
+
+const readCards = [
+  {
+    title: 'Time & sales',
+    href: '/como-funciona',
+    text: 'A sequência de negócios executados — preço, volume e quem foi o agressor, comprador ou vendedor.',
+  },
+  {
+    title: 'Livro de ofertas',
+    href: '/conceitos/livro-de-ofertas',
+    text: 'As ofertas de compra e venda ainda não executadas ("order book"), e como elas se movem.',
+  },
+  {
+    title: 'Absorção',
+    href: '/conceitos/absorcao',
+    text: 'Volume grande negociado num preço sem que ele se mova — sinal de ordem grande segurando a pressão contrária.',
+  },
+  {
+    title: 'Agressão',
+    href: '/conceitos/agressao',
+    text: 'A intensidade com que compradores ou vendedores "batem" contra o livro para executar a qualquer preço.',
+  },
+];
 ---
 
 <Base title={title} description={description} graph={pageGraph}>
-  <section class="hero">
-    <h1>Leitura de fita e fluxo de ordens para o mini-dólar (WDO) na B3</h1>
-    <p class="lead">
-      <strong>Tape Vision AI</strong> lê o mercado como um operador de mesa proprietária lê a fita:
-      pelo <em>fluxo de ordens</em> — time &amp; sales, livro de ofertas, absorção e agressão — não
-      por indicadores gráficos ou médias móveis.
+  <section class="hero container">
+    <div class="hero-copy">
+      <p class="eyebrow">WDO · B3 · Fluxo de ordens</p>
+      <h1>Leia a fita, não o gráfico.</h1>
+      <p class="lead">
+        <strong>Tape Vision AI</strong> lê o <strong>mini-dólar (WDO)</strong>, o contrato futuro de
+        dólar negociado na <strong>B3</strong>, pelo <em>fluxo de ordens</em> — time &amp; sales,
+        livro de ofertas, absorção e agressão — como um operador de mesa proprietária lê a fita, não
+        por indicadores de gráfico ou médias móveis.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+        <a class="hero-secondary" href="/como-funciona">Como funciona</a>
+      </div>
+      <p class="hero-reinforcement">Sem sinal automático. Sem promessa de lucro.</p>
+    </div>
+
+    <div class="hero-visual">
+      <TapePanel />
+    </div>
+  </section>
+
+  <section class="reads container">
+    <h2>O que o sistema lê</h2>
+    <p class="section-lead">
+      Quatro sinais de leitura de fita ("tape reading"), lidos em tempo real no fluxo de ordens do
+      WDO — não desenhados sobre o gráfico de preço.
     </p>
-    <p>
-      É para traders de <strong>mini-dólar (WDO)</strong>, o contrato futuro de dólar negociado na
-      <strong>B3</strong> (a bolsa brasileira), que já operam com base em leitura de fita
-      ("tape reading") e querem uma ferramenta que analise esse fluxo em tempo real — não mais um
-      indicador de gráfico repaginado.
-    </p>
-    <p class="disqualifier">
-      Não é para quem busca sinais automáticos de compra/venda, robôs de "lucro garantido" ou
-      ferramentas baseadas em indicadores técnicos de gráfico — se é isso que você procura, este não
-      é o produto certo para você.
-    </p>
+    <div class="reads-grid">
+      {
+        readCards.map((card) => (
+          <a class="card read-card" href={card.href}>
+            <h3>{card.title}</h3>
+            <p>{card.text}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="audience container">
+    <div class="audience-col audience-yes">
+      <p class="eyebrow">Para quem é</p>
+      <p>
+        Para traders de <strong>mini-dólar (WDO)</strong> na <strong>B3</strong> que já operam com
+        leitura de fita ("tape reading") e querem uma ferramenta que analise esse fluxo de ordens em
+        tempo real — não mais um indicador de gráfico repaginado.
+      </p>
+    </div>
+    <div class="audience-col audience-no">
+      <p class="eyebrow eyebrow-sell">Para quem não é</p>
+      <p class="disqualifier">
+        Não é para quem busca sinais automáticos de compra/venda, robôs de "lucro garantido" ou
+        ferramentas baseadas em indicadores técnicos de gráfico — se é isso que você procura, este
+        não é o produto certo para você.
+      </p>
+    </div>
   </section>
 
   {
     concepts.length > 0 && (
-      <section class="concepts">
+      <section class="concepts container">
         <h2>Conceitos de leitura de fita</h2>
-        <ul>
+        <div class="concepts-grid">
           {concepts.map((c) => (
-            <li>
-              <a href={`/conceitos/${c.id}`}>{c.data.title}</a>
-            </li>
+            <a class="card concept-card" href={`/conceitos/${c.id}`}>
+              <h3>{c.data.title}</h3>
+              <p>{c.data.answer}</p>
+            </a>
           ))}
-        </ul>
+        </div>
       </section>
     )
   }
 
-  <section slot="cta" class="cta">
-    <a class="btn-primary" href="/acesso">Entrar na lista de acesso antecipado</a>
+  <section slot="cta" class="cta container">
+    <h2>Pronto para ler a fita?</h2>
+    <a class="btn-secondary" href="/acesso">Entrar na lista de acesso antecipado</a>
   </section>
 </Base>
 
 <style>
   .hero {
-    max-width: 70ch;
-    margin: 0 auto;
-    padding: 3rem 1rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-block: clamp(3rem, 7vw, 5.5rem);
   }
 
-  .lead {
+  .hero-copy .lead {
     font-size: 1.125rem;
+    color: var(--muted);
   }
 
-  .disqualifier {
-    color: var(--color-text-muted);
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-block: 1.5rem 1rem;
+  }
+
+  .hero-secondary {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .hero-reinforcement {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .section-lead {
+    color: var(--muted);
+    max-width: 60ch;
+  }
+
+  .reads,
+  .audience,
+  .concepts {
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+    border-top: 1px solid var(--hairline);
+  }
+
+  .reads-grid,
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .card {
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.15s ease;
+  }
+
+  .card:hover {
+    border-color: var(--buy);
+  }
+
+  .card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
     font-size: 0.9375rem;
   }
 
+  .concept-card p {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .audience {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .audience-col {
+    border-left: 3px solid var(--buy);
+    padding-left: 1.25rem;
+  }
+
+  .audience-no {
+    border-left-color: var(--sell);
+  }
+
+  .eyebrow-sell {
+    color: var(--sell);
+  }
+
+  .disqualifier {
+    color: var(--text);
+  }
+
   .cta {
-    max-width: 70ch;
-    margin: 0 auto;
     text-align: center;
   }
 
-  .concepts {
-    max-width: 70ch;
-    margin: 2rem auto 0;
-    padding: 0 1rem;
+  .cta h2 {
+    margin-bottom: 1.5rem;
   }
 
-  .concepts ul {
-    padding-left: 1.25rem;
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+
+    .audience {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 </style>

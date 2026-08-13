@@ -5,15 +5,19 @@ import { NAV_LINKS, PRODUCT_NAME } from '../lib/site';
 const currentPath = Astro.url.pathname;
 ---
 
-<nav aria-label="Principal">
+<nav class="container" aria-label="Principal">
   <a href="/" class="brand" aria-label={PRODUCT_NAME}>
-    <Logo height={28} />
+    <Logo height={26} />
   </a>
   <ul>
     {
       NAV_LINKS.map((link) => (
         <li>
-          <a href={link.href} aria-current={currentPath === link.href ? 'page' : undefined}>
+          <a
+            href={link.href}
+            class={link.href === '/acesso' ? 'nav-cta' : undefined}
+            aria-current={currentPath === link.href ? 'page' : undefined}
+          >
             {link.label}
           </a>
         </li>
@@ -28,18 +32,19 @@ const currentPath = Astro.url.pathname;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem;
+    padding-block: 0.875rem;
     flex-wrap: wrap;
   }
 
   .brand {
     display: flex;
     text-decoration: none;
-    color: var(--color-text);
+    color: var(--text);
   }
 
   ul {
     display: flex;
+    align-items: center;
     gap: 1.5rem;
     list-style: none;
     margin: 0;
@@ -47,12 +52,29 @@ const currentPath = Astro.url.pathname;
   }
 
   a {
-    color: var(--color-text);
+    color: var(--text);
     text-decoration: none;
   }
 
   a:hover,
   a[aria-current='page'] {
-    color: var(--color-accent);
+    color: var(--buy);
+  }
+
+  .nav-cta {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--buy);
+    border-radius: 0.5rem;
+    color: var(--buy);
+  }
+
+  .nav-cta:hover {
+    background: rgb(0 255 136 / 0.08);
+  }
+
+  @media (max-width: 520px) {
+    ul {
+      gap: 1rem;
+    }
   }
 </style>

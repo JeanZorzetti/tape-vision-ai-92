@@ -32,6 +32,20 @@ const resolvedOgImage = ogImage ?? `${SITE_ORIGIN}/og/home.png`;
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/og/logo.png" />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-sans-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-sans-latin-600-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -48,7 +62,7 @@ const resolvedOgImage = ogImage ?? `${SITE_ORIGIN}/og/home.png`;
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-    <header>
+    <header class="site-header">
       <Nav />
     </header>
     <main id="conteudo">
@@ -63,7 +77,17 @@ const resolvedOgImage = ogImage ?? `${SITE_ORIGIN}/og/home.png`;
 </html>
 
 <style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--hairline);
+  }
+
   .cta-region {
-    padding: 2rem 1rem;
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+    border-top: 1px solid var(--hairline);
   }
 </style>
