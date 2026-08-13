@@ -105,11 +105,11 @@ account, exercises every auth branch, and deletes it.
 
 ```
 Backend/
+├── api/
+│   └── index.js                ← Vercel entry; re-exports src/server-production.js
 ├── src/
-│   ├── server-production.js    ← Deploy this file
-│   ├── server-auth.js          ← Backup/development
-│   └── server-minimal.ts       ← Backup/development
-├── .env.production             ← Production environment template
+│   └── server-production.js    ← The only server that runs
+├── vercel.json                 ← Rewrites every path to /api
 └── package.json
 
 Frontend/
@@ -177,30 +177,13 @@ After deployment, test these endpoints:
 
 ## Deployment Commands
 
-### Backend (Easypanel)
+### Backend (Easypanel, alternative to Vercel)
 
-**IMPORTANTE: Configure o servidor para usar as rotas de autenticação!**
+Only `src/server-production.js` exists as a server entrypoint — the rival
+`server-minimal*`/`server-auth`/`server.ts` files were deleted. Start it with:
 
-O problema atual é que o Easypanel está executando `server-minimal.js` que NÃO tem as rotas de autenticação (`/api/auth/login`, etc.).
-
-**Configuração no Easypanel:**
-
-1. **Comando de Start:** Use `npm start` (já configurado para `server-production.js`)
-2. **Ou usar diretamente:** `node src/server-production.js`
-3. **Port:** 3001 (configurado no .env.production)
-
-**Verificação das rotas disponíveis:**
-- ❌ `server-minimal.js` → Não tem rotas `/api/auth/*`  
-- ✅ `server-production.js` → Tem todas as rotas de autenticação
-- ✅ `server-auth.js` → Alternativa com autenticação
-
-**Configuração recomendada no Easypanel:**
 ```bash
-# Start Command
-npm start
-
-# Ou alternativo
-node src/server-production.js
+npm start            # → node src/server-production.js (port 3001)
 ```
 
 ### Frontend (Vercel)
