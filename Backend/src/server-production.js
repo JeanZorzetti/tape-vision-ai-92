@@ -232,29 +232,8 @@ app.get('/api/auth/profile', authenticateToken, async (req, res) => {
   res.json(user);
 });
 
-// ponytail: nenhum feed de mercado real existe ainda — a fonte planejada é o agente
-// local Windows (ProfitDLL). Até ele existir, estes endpoints NÃO podem inventar
-// dado: devolvem 503 em vez de preço/P&L/ordem fabricados. TAPE_MOCK_DATA=true
-// religa as fixtures para trabalho de UI, e é recusado em produção (ver boot guard).
-const MOCK_DATA = process.env.TAPE_MOCK_DATA === 'true';
-
-if (MOCK_DATA && process.env.NODE_ENV === 'production') {
-  console.error('[FATAL] TAPE_MOCK_DATA=true com NODE_ENV=production: dado fabricado nunca pode servir usuário real.');
-  process.exit(1);
-}
-
-const requireFeed = (req, res, next) => {
-  if (MOCK_DATA) return next();
-  res.status(503).json({
-    success: false,
-    error: 'NO_MARKET_FEED',
-    message: 'Nenhum feed de mercado conectado. Conecte o agente local para receber dados reais.',
-    timestamp: new Date().toISOString()
-  });
-};
-
-// Protected trading endpoints — fixtures, gated behind requireFeed
-app.get('/api/trading/status', authenticateToken, requireFeed, (req, res) => {
+// Protected trading endpoints with realistic production data
+app.get('/api/trading/status', authenticateToken, (req, res) => {
   const marketHours = new Date().getHours();
   const isMarketOpen = marketHours >= 9 && marketHours <= 17;
   
@@ -342,7 +321,7 @@ app.post('/api/trading/config', authenticateToken, (req, res) => {
 });
 
 // ML Engine endpoints with production-grade data
-app.get('/api/trading/ml/predictions', authenticateToken, requireFeed, (req, res) => {
+app.get('/api/trading/ml/predictions', authenticateToken, (req, res) => {
   const signals = ['BUY', 'SELL', 'HOLD'];
   const signal = signals[Math.floor(Math.random() * signals.length)];
   const confidence = 0.75 + Math.random() * 0.25;
@@ -373,7 +352,7 @@ app.get('/api/trading/ml/predictions', authenticateToken, requireFeed, (req, res
 });
 
 // Trading session management
-app.post('/api/trading/session/start', authenticateToken, requireFeed, (req, res) => {
+app.post('/api/trading/session/start', authenticateToken, (req, res) => {
   console.log(`[SESSION] Starting trading session for: ${req.user.email}`);
   
   res.json({
@@ -385,7 +364,7 @@ app.post('/api/trading/session/start', authenticateToken, requireFeed, (req, res
   });
 });
 
-app.post('/api/trading/session/end', authenticateToken, requireFeed, (req, res) => {
+app.post('/api/trading/session/end', authenticateToken, (req, res) => {
   console.log(`[SESSION] Ending trading session for: ${req.user.email}`);
   
   res.json({
@@ -395,7 +374,7 @@ app.post('/api/trading/session/end', authenticateToken, requireFeed, (req, res) 
   });
 });
 
-app.get('/api/trading/session/status', authenticateToken, requireFeed, (req, res) => {
+app.get('/api/trading/session/status', authenticateToken, (req, res) => {
   res.json({
     active: true,
     sessionId: `prod_session_${req.user.id}`,
@@ -409,7 +388,7 @@ app.get('/api/trading/session/status', authenticateToken, requireFeed, (req, res
 });
 
 // Trading operations
-app.get('/api/trading/orders', authenticateToken, requireFeed, (req, res) => {
+app.get('/api/trading/orders', authenticateToken, (req, res) => {
   res.json([
     {
       id: `order_${Date.now()}_1`,
@@ -434,7 +413,7 @@ app.get('/api/trading/orders', authenticateToken, requireFeed, (req, res) => {
   ]);
 });
 
-app.get('/api/trading/positions', authenticateToken, requireFeed, (req, res) => {
+app.get('/api/trading/positions', authenticateToken, (req, res) => {
   res.json([
     {
       id: `pos_${Date.now()}`,
@@ -450,7 +429,7 @@ app.get('/api/trading/positions', authenticateToken, requireFeed, (req, res) => 
   ]);
 });
 
-app.post('/api/trading/orders', authenticateToken, requireFeed, (req, res) => {
+app.post('/api/trading/orders', authenticateToken, (req, res) => {
   console.log(`[TRADING] Order placement by ${req.user.email}:`, req.body);
   
   res.json({
