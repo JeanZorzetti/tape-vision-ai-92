@@ -34,8 +34,8 @@ the only dynamic surface, so a single server route is the whole server-side foot
 ## R2. Hosting, domain, and deployment
 
 **Decision**: a **separate Vercel project** deploying `Site/`, on the domain
-`tapevision.roilabs.com.br`. The existing trading app keeps `aitradingbot.roilabs.com.br`
-and the API keeps `apptapevision.roilabs.com.br`.
+`tapevision.roilabs.com.br`. The existing trading app keeps `apptapevision.roilabs.com.br`
+and the API keeps `apitapevision.roilabs.com.br`.
 
 **Rationale**: Vercel is already the org's front-end host (see `DEPLOYMENT.md`), so this adds no
 new vendor. A separate project means a marketing deploy can never break the trading app, and its

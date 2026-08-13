@@ -21,8 +21,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write 'src/**/*.{ts,json}'",
-    "db:migrate": "ts-node src/database/migrations/migrate.ts",
-    "db:seed": "ts-node src/database/seeds/seed.ts",
+    "db:init": "node scripts/init-db.js",
     "logs": "tail -f logs/trading.log",
     "monitor": "pm2 monit"
   },
@@ -63,6 +62,7 @@
     "numjs": "^0.16.1",
     "p-queue": "^8.1.0",
     "p-retry": "^6.2.1",
+    "postgres": "^3.4.9",
     "redis": "^4.7.1",
     "simple-statistics": "^7.8.8",
     "socket.io": "^4.8.1",

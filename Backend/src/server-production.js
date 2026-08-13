@@ -15,10 +15,12 @@ const PORT = process.env.PORT || 3001;
 // Load environment variables
 require('dotenv').config();
 
+const { authenticate, findUserById } = require('./db');
+
 // Production environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'tape-vision-prod-secret-2025-roilabs-br';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '24h';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://aitradingbot.roilabs.com.br';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://apptapevision.roilabs.com.br';
 const ML_ENGINE_URL = process.env.ML_ENGINE_URL || 'https://ml.aitrading.roilabs.com.br';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [FRONTEND_URL, ML_ENGINE_URL];
 
@@ -48,41 +50,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Production user store (in real production, use database)
-const users = [
-  {
-    id: '1',
-    email: 'demo@aitrading.com',
-    password: 'demo2025',
-    name: 'Demo User',
-    role: 'TRADER',
-    permissions: ['TRADING_ENABLED', 'ML_ACCESS']
-  },
-  {
-    id: '2', 
-    email: 'admin@aitrading.com',
-    password: 'admin2025',
-    name: 'Admin User',
-    role: 'ADMIN',
-    permissions: ['TRADING_ENABLED', 'ML_ACCESS', 'ADMIN_ACCESS']
-  },
-  {
-    id: '3',
-    email: 'ml.engine@aitrading.roilabs.com.br',
-    password: process.env.ML_ENGINE_PASSWORD || 'MLEngine@2025!',
-    name: 'ML Engine Service',
-    role: 'SERVICE',
-    permissions: ['ML_ENGINE_ACCESS', 'DATA_ACCESS', 'TRADING_ENABLED', 'ML_ACCESS']
-  },
-  {
-    id: '4',
-    email: 'trader@roilabs.com.br',
-    password: 'Trader2025!',
-    name: 'Professional Trader',
-    role: 'TRADER',
-    permissions: ['TRADING_ENABLED', 'ML_ACCESS', 'ADVANCED_FEATURES']
-  }
-];
+// Users live in Postgres (see src/db.js). Seed them with `npm run db:init`.
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
@@ -150,11 +118,11 @@ app.get('/', (req, res) => {
 });
 
 // Authentication routes
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
-  
+
   console.log(`[AUTH] Login attempt for: ${email} from ${req.ip}`);
-  
+
   if (!email || !password) {
     return res.status(400).json({
       success: false,
@@ -162,10 +130,19 @@ app.post('/api/auth/login', (req, res) => {
       code: 'MISSING_CREDENTIALS'
     });
   }
-  
-  // Find user
-  const user = users.find(u => u.email === email && u.password === password);
-  
+
+  let user;
+  try {
+    user = await authenticate(email, password);
+  } catch (error) {
+    console.error(`[AUTH] User lookup failed: ${error.message}`);
+    return res.status(503).json({
+      success: false,
+      error: 'Authentication service unavailable',
+      code: 'AUTH_UNAVAILABLE'
+    });
+  }
+
   if (!user) {
     console.log(`[AUTH] Invalid credentials for: ${email}`);
     return res.status(401).json({
@@ -174,7 +151,7 @@ app.post('/api/auth/login', (req, res) => {
       code: 'INVALID_CREDENTIALS'
     });
   }
-  
+
   // Generate JWT token
   const tokenPayload = {
     id: user.id,
@@ -214,7 +191,7 @@ app.post('/api/auth/logout', authenticateToken, (req, res) => {
   });
 });
 
-app.post('/api/auth/refresh', (req, res) => {
+app.post('/api/auth/refresh', async (req, res) => {
   const { refreshToken } = req.body;
   
   if (!refreshToken) {
@@ -223,8 +200,8 @@ app.post('/api/auth/refresh', (req, res) => {
   
   try {
     const decoded = jwt.verify(refreshToken, JWT_SECRET);
-    const user = users.find(u => u.id === decoded.id);
-    
+    const user = await findUserById(decoded.id);
+
     if (!user) {
       return res.status(401).json({ success: false, error: 'Invalid refresh token' });
     }
@@ -245,20 +222,14 @@ app.post('/api/auth/refresh', (req, res) => {
   }
 });
 
-app.get('/api/auth/profile', authenticateToken, (req, res) => {
-  const user = users.find(u => u.id === req.user.id);
-  
+app.get('/api/auth/profile', authenticateToken, async (req, res) => {
+  const user = await findUserById(req.user.id);
+
   if (!user) {
     return res.status(404).json({ success: false, error: 'User not found' });
   }
-  
-  res.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    permissions: user.permissions
-  });
+
+  res.json(user);
 });
 
 // Protected trading endpoints with realistic production data
@@ -522,15 +493,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(60));
   console.log(`📡 Server running on: http://0.0.0.0:${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'production'}`);
-  console.log(`🔐 JWT Secret: ${JWT_SECRET.substring(0, 10)}...`);
   console.log(`🎯 Frontend URL: ${FRONTEND_URL}`);
   console.log(`🤖 ML Engine URL: ${ML_ENGINE_URL}`);
-  console.log('');
-  console.log('📝 Production User Accounts:');
-  console.log('   👤 demo@aitrading.com / demo2025');
-  console.log('   👤 admin@aitrading.com / admin2025');
-  console.log('   👤 trader@roilabs.com.br / Trader2025!');
-  console.log('   🤖 ml.engine@aitrading.roilabs.com.br');
+  console.log('🗄️  User store: Postgres (app_user)');
   console.log('');
   console.log('🎯 Ready for production trading operations!');
   console.log('='.repeat(60));

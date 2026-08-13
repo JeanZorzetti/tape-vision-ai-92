@@ -281,7 +281,7 @@ ML_ENGINE_PASSWORD=MLEngine@2025!
 ML_ENGINE_API_KEY=ml-engine-api-key-2025
 
 # Frontend (.env)
-VITE_API_URL=https://apptapevision.roilabs.com.br
+VITE_API_URL=https://apitapevision.roilabs.com.br
 ```
 
 ### **B. Security Headers:**

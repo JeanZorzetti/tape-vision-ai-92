@@ -127,11 +127,11 @@ curl -X POST "https://ml.aitradingapi.roilabs.com.br/v1/analyze" \
 
 ## ⚠️ **Resolução de Conflitos**
 
-### **Se `apptapevision.roilabs.com.br` já existe no EasyPanel:**
+### **Se `apitapevision.roilabs.com.br` já existe no EasyPanel:**
 
 **Estratégia 1: Subdomínios Separados**
 ```
-EasyPanel Backend: apptapevision.roilabs.com.br
+EasyPanel Backend: apitapevision.roilabs.com.br
 Railway ML Engine: ml.aitradingapi.roilabs.com.br
 ```
 
@@ -144,7 +144,7 @@ location /ml {
 }
 
 # Resultado:
-# apptapevision.roilabs.com.br/ml/v1/docs
+# apitapevision.roilabs.com.br/ml/v1/docs
 ```
 
 **Estratégia 3: Integração Completa**

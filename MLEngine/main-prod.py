@@ -24,9 +24,9 @@ class Config:
     HOST = os.getenv("HOST", "0.0.0.0")
     PORT = int(os.getenv("PORT", 8001))
     ENV = os.getenv("ENVIRONMENT", "production")
-    ALLOWED_HOSTS = ["apptapevision.roilabs.com.br", "*.roilabs.com.br", "localhost"]
+    ALLOWED_HOSTS = ["apitapevision.roilabs.com.br", "*.roilabs.com.br", "localhost"]
     CORS_ORIGINS = [
-        "https://apptapevision.roilabs.com.br",
+        "https://apitapevision.roilabs.com.br",
         "https://roilabs.com.br",
         "http://localhost:3000",
         "http://localhost:8080"

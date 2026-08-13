@@ -2,13 +2,13 @@
 
 ## Environment Variables Configuration
 
-### 1. Vercel Frontend (aitradingbot.roilabs.com.br)
+### 1. Vercel Frontend (apptapevision.roilabs.com.br)
 
 **Environment Variables to set in Vercel Dashboard:**
 
 ```env
-VITE_API_URL=https://apptapevision.roilabs.com.br
-VITE_WS_URL=wss://apptapevision.roilabs.com.br
+VITE_API_URL=https://apitapevision.roilabs.com.br
+VITE_WS_URL=wss://apitapevision.roilabs.com.br
 VITE_ENV=production
 VITE_NODE_ENV=production
 VITE_DEBUG=false
@@ -26,7 +26,7 @@ GENERATE_SOURCEMAP=false
 **Environment Variables to set in Vercel Dashboard:**
 
 ```env
-BACKEND_URL=https://apptapevision.roilabs.com.br
+BACKEND_URL=https://apitapevision.roilabs.com.br
 BACKEND_API_KEY=ml-engine-api-key-2025
 ML_ENGINE_EMAIL=ml.engine@aitrading.roilabs.com.br
 ML_ENGINE_PASSWORD=MLEngine@2025!
@@ -48,19 +48,21 @@ LOG_FORMAT=json
 3. Add each variable with Production scope
 4. Redeploy the project
 
-### 3. Easypanel Backend (apptapevision.roilabs.com.br)
+### 3. Easypanel Backend (apitapevision.roilabs.com.br)
 
 **Environment Variables to set in Easypanel:**
 
 ```env
 NODE_ENV=production
 PORT=3001
+# Users live in Postgres (table app_user). Same instance as the Site waitlist.
+DATABASE_URL=postgres://tape_db:<senha>@<host>:5456/tape_db?sslmode=disable
 JWT_SECRET=tape-vision-prod-secret-2025-roilabs-br
 JWT_EXPIRES=24h
 JWT_REFRESH_EXPIRES=30d
-FRONTEND_URL=https://aitradingbot.roilabs.com.br
+FRONTEND_URL=https://apptapevision.roilabs.com.br
 ML_ENGINE_URL=https://ml.aitrading.roilabs.com.br
-ALLOWED_ORIGINS=https://aitradingbot.roilabs.com.br,https://ml.aitrading.roilabs.com.br
+ALLOWED_ORIGINS=https://apptapevision.roilabs.com.br,https://ml.aitrading.roilabs.com.br
 RATE_LIMIT_REQUESTS=1000
 RATE_LIMIT_WINDOW=3600
 ENABLE_RATE_LIMITING=true
@@ -76,11 +78,17 @@ LOG_LEVEL=info
 ```
 
 **Setup Steps:**
-1. Go to Easypanel Dashboard → Your Backend Service
-2. Navigate to Environment Variables section
-3. Add each variable
-4. Deploy `server-production.js` as main entry point
-5. Restart the service
+1. Point `apitapevision.roilabs.com.br` at the Easypanel host (an A record — it
+   currently resolves to Vercel, which serves no API and has no certificate for it)
+2. Go to Easypanel Dashboard → Your Backend Service
+3. Navigate to Environment Variables section
+4. Add each variable
+5. Deploy `server-production.js` as main entry point
+6. Seed the user table once: `ADMIN_EMAIL=... ADMIN_PASSWORD=... ML_ENGINE_PASSWORD=... npm run db:init`
+7. Restart the service
+
+Verify the store with `node scripts/check-auth.js` — it creates a throwaway
+account, exercises every auth branch, and deletes it.
 
 ## File Structure for Production
 
@@ -128,12 +136,12 @@ After deployment, test these endpoints:
 
 1. **Backend Health Check:**
    ```
-   GET https://apptapevision.roilabs.com.br/health
+   GET https://apitapevision.roilabs.com.br/health
    ```
 
 2. **Authentication:**
    ```
-   POST https://apptapevision.roilabs.com.br/api/auth/login
+   POST https://apitapevision.roilabs.com.br/api/auth/login
    {
      "email": "demo@aitrading.com",
      "password": "demo2025"
@@ -142,13 +150,13 @@ After deployment, test these endpoints:
 
 3. **ML Engine Integration:**
    ```
-   GET https://apptapevision.roilabs.com.br/api/trading/ml/predictions
+   GET https://apitapevision.roilabs.com.br/api/trading/ml/predictions
    Authorization: Bearer [token]
    ```
 
 4. **Frontend Access:**
    ```
-   https://aitradingbot.roilabs.com.br
+   https://apptapevision.roilabs.com.br
    ```
 
 5. **ML Engine Access:**

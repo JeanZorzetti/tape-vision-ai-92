@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 
-const BACKEND_URL = 'https://apptapevision.roilabs.com.br';
+const BACKEND_URL = 'https://apitapevision.roilabs.com.br';
 
 async function checkRoutes() {
   console.log('🔍 Verificando rotas do servidor...\n');
