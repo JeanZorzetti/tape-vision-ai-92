@@ -267,7 +267,7 @@ async def log_requests(request: Request, call_next):
 
 ### **Architecture Final:**
 ```
-Frontend ← → Backend EasyPanel (aitradingapi.roilabs.com.br)
+Frontend ← → Backend EasyPanel (apptapevision.roilabs.com.br)
               ↓
          ML Engine Vercel (ml.aitradingapi.roilabs.com.br)
 ```

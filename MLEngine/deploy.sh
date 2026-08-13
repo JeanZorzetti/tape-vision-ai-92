@@ -35,14 +35,14 @@ case $choice in
         echo "4. Select this repository"
         echo "5. Set root directory to: MLEngine"
         echo "6. Railway will auto-detect Dockerfile.prod"
-        echo "7. Add custom domain: aitradingapi.roilabs.com.br"
+        echo "7. Add custom domain: apptapevision.roilabs.com.br"
         echo ""
         echo "✅ Configuration files ready:"
         echo "   - railway.json (Railway configuration)"
         echo "   - Dockerfile.prod (Production Docker image)"
         echo ""
         echo "🔗 After deployment, your API will be available at:"
-        echo "   https://aitradingapi.roilabs.com.br/v1/docs"
+        echo "   https://apptapevision.roilabs.com.br/v1/docs"
         ;;
     2)
         echo "🎨 Deploying to Render..."
@@ -61,7 +61,7 @@ case $choice in
         echo "   - Dockerfile.prod (Production Docker image)"
         echo ""
         echo "🔗 After deployment, your API will be available at:"
-        echo "   https://aitradingapi.roilabs.com.br/v1/docs"
+        echo "   https://apptapevision.roilabs.com.br/v1/docs"
         ;;
     3)
         echo "✈️ Deploying to Fly.io..."
@@ -117,7 +117,7 @@ case $choice in
 esac
 
 echo ""
-echo "🎯 Next steps for custom domain (aitradingapi.roilabs.com.br):"
+echo "🎯 Next steps for custom domain (apptapevision.roilabs.com.br):"
 echo "1. Configure DNS A record pointing to your server IP"
 echo "2. Set up SSL certificate (Let's Encrypt or Cloudflare)"
 echo "3. Update nginx.conf with your SSL certificates"

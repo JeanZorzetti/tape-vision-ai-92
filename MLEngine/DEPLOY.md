@@ -19,9 +19,9 @@ railway up
 
 3. **Configurar domínio:**
 - No Railway dashboard: Settings → Domains
-- Adicionar: `aitradingapi.roilabs.com.br`
+- Adicionar: `apptapevision.roilabs.com.br`
 
-**URL final:** `https://aitradingapi.roilabs.com.br/v1/docs`
+**URL final:** `https://apptapevision.roilabs.com.br/v1/docs`
 
 ### 2. 🐙 **Render**
 
@@ -103,25 +103,25 @@ TTL: Auto
 
 **Railway:**
 1. Dashboard → Settings → Domains
-2. Add Custom Domain: `aitradingapi.roilabs.com.br`
+2. Add Custom Domain: `apptapevision.roilabs.com.br`
 3. Railway fornecerá instruções DNS específicas
 
 **Render:**
 1. Settings → Custom Domains  
-2. Add: `aitradingapi.roilabs.com.br`
+2. Add: `apptapevision.roilabs.com.br`
 3. Seguir instruções DNS do Render
 
 **Fly.io:**
 ```bash
-flyctl certs add aitradingapi.roilabs.com.br
-flyctl certs show aitradingapi.roilabs.com.br
+flyctl certs add apptapevision.roilabs.com.br
+flyctl certs show apptapevision.roilabs.com.br
 ```
 
 ### SSL Certificate:
 
 **Opção 1 - Let's Encrypt (Gratuito):**
 ```bash
-certbot --nginx -d aitradingapi.roilabs.com.br
+certbot --nginx -d apptapevision.roilabs.com.br
 ```
 
 **Opção 2 - Cloudflare (Recomendado):**
@@ -135,19 +135,19 @@ HOST=0.0.0.0
 PORT=8001
 ENVIRONMENT=production
 CONFIDENCE_THRESHOLD=0.90
-ALLOWED_ORIGINS=https://aitradingapi.roilabs.com.br,https://roilabs.com.br
+ALLOWED_ORIGINS=https://apptapevision.roilabs.com.br,https://roilabs.com.br
 ```
 
 ## 📊 Monitoramento
 
 ### Health Check:
 ```bash
-curl https://aitradingapi.roilabs.com.br/health
+curl https://apptapevision.roilabs.com.br/health
 ```
 
 ### API Docs:
 ```bash
-https://aitradingapi.roilabs.com.br/v1/docs
+https://apptapevision.roilabs.com.br/v1/docs
 ```
 
 ### Endpoints Principais:
@@ -160,7 +160,7 @@ https://aitradingapi.roilabs.com.br/v1/docs
 
 ```bash
 # Teste básico
-curl -X POST "https://aitradingapi.roilabs.com.br/v1/analyze" \
+curl -X POST "https://apptapevision.roilabs.com.br/v1/analyze" \
   -H "Content-Type: application/json" \
   -d '{"market_data":{"symbol":"WDO","price":4580.25,"volume":150}}'
 
@@ -184,4 +184,4 @@ curl -X POST "https://aitradingapi.roilabs.com.br/v1/analyze" \
 4. `railway up`
 5. Configurar domínio no dashboard
 
-**Pronto! API disponível em:** `https://aitradingapi.roilabs.com.br/v1/docs`
+**Pronto! API disponível em:** `https://apptapevision.roilabs.com.br/v1/docs`

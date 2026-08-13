@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 # Configuration
 BASE_URL = "http://localhost:8001"
-# For production testing, change to: BASE_URL = "https://aitradingapi.roilabs.com.br"
+# For production testing, change to: BASE_URL = "https://apptapevision.roilabs.com.br"
 
 def test_endpoint(method: str, endpoint: str, data: Dict[Any, Any] = None) -> Dict[str, Any]:
     """Test a single API endpoint"""

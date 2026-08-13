@@ -1,4 +1,4 @@
-# 🚀 Production Deployment Checklist - aitradingapi.roilabs.com.br
+# 🚀 Production Deployment Checklist - apptapevision.roilabs.com.br
 
 ## ✅ Pre-Deployment Checklist
 
@@ -34,7 +34,7 @@
 6. [ ] Railway auto-detects `Dockerfile.prod`
 7. [ ] Wait for build to complete
 8. [ ] Go to Settings → Domains
-9. [ ] Add Custom Domain: `aitradingapi.roilabs.com.br`
+9. [ ] Add Custom Domain: `apptapevision.roilabs.com.br`
 10. [ ] Update DNS records as instructed
 
 ### Option B: Render
@@ -51,7 +51,7 @@
 2. [ ] `flyctl auth login`
 3. [ ] `cd MLEngine`
 4. [ ] `flyctl launch --dockerfile Dockerfile.prod`
-5. [ ] `flyctl certs add aitradingapi.roilabs.com.br`
+5. [ ] `flyctl certs add apptapevision.roilabs.com.br`
 
 ## 🌐 DNS Configuration
 
@@ -75,27 +75,27 @@
 ## 🧪 Post-Deployment Testing
 
 ### 1. Basic Tests
-- [ ] `curl https://aitradingapi.roilabs.com.br/health`
+- [ ] `curl https://apptapevision.roilabs.com.br/health`
   - Expected: `{"status": "healthy"}`
   
-- [ ] `curl https://aitradingapi.roilabs.com.br/`
+- [ ] `curl https://apptapevision.roilabs.com.br/`
   - Expected: API information JSON
 
 ### 2. API Documentation
-- [ ] Visit: https://aitradingapi.roilabs.com.br/v1/docs
+- [ ] Visit: https://apptapevision.roilabs.com.br/v1/docs
 - [ ] Swagger UI loads correctly
 - [ ] All endpoints visible
 
 ### 3. Comprehensive Test
 ```bash
 # Update test_api.py BASE_URL to production URL
-BASE_URL = "https://aitradingapi.roilabs.com.br"
+BASE_URL = "https://apptapevision.roilabs.com.br"
 python test_api.py
 ```
 
 ### 4. Production Analysis Test
 ```bash
-curl -X POST "https://aitradingapi.roilabs.com.br/v1/analyze" \
+curl -X POST "https://apptapevision.roilabs.com.br/v1/analyze" \
   -H "Content-Type: application/json" \
   -d '{
     "market_data": {
@@ -159,4 +159,4 @@ Expected response:
 ---
 
 **🎉 Once complete, your AI Trading API will be live at:**
-**https://aitradingapi.roilabs.com.br/v1/docs**
+**https://apptapevision.roilabs.com.br/v1/docs**

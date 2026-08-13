@@ -1,7 +1,7 @@
 # 🚨 Resolução de Conflito - Domínio já usado no EasyPanel
 
 ## 📍 Situação Atual
-- **EasyPanel Backend**: `aitradingapi.roilabs.com.br` (já em uso)
+- **EasyPanel Backend**: `apptapevision.roilabs.com.br` (já em uso)
 - **Railway ML Engine**: Precisa de um endpoint para deploy
 
 ## 💡 **3 Soluções Disponíveis**
@@ -12,7 +12,7 @@
 
 **Configuração:**
 ```
-Backend EasyPanel: aitradingapi.roilabs.com.br
+Backend EasyPanel: apptapevision.roilabs.com.br
 ML Engine Railway: ml.aitradingapi.roilabs.com.br
 ```
 
@@ -30,7 +30,7 @@ Value: [railway-generated-url].up.railway.app
 ```
 
 **URLs Finais:**
-- Backend: `https://aitradingapi.roilabs.com.br`
+- Backend: `https://apptapevision.roilabs.com.br`
 - ML Engine: `https://ml.aitradingapi.roilabs.com.br/v1/docs`
 
 ---
@@ -58,8 +58,8 @@ location /v1 {
 ```
 
 **URLs Finais:**
-- Backend: `https://aitradingapi.roilabs.com.br` (EasyPanel)
-- ML Engine: `https://aitradingapi.roilabs.com.br/v1/docs` (proxy para Railway)
+- Backend: `https://apptapevision.roilabs.com.br` (EasyPanel)
+- ML Engine: `https://apptapevision.roilabs.com.br/v1/docs` (proxy para Railway)
 
 **Vantagens:**
 - ✅ Um único domínio
@@ -74,7 +74,7 @@ location /v1 {
 **Migrar todo o backend para Railway:**
 - Mover Backend TypeScript para Railway
 - Mover ML Engine Python para Railway
-- Usar apenas `aitradingapi.roilabs.com.br`
+- Usar apenas `apptapevision.roilabs.com.br`
 
 **Vantagens:**
 - ✅ Arquitetura unificada
@@ -97,7 +97,7 @@ location /v1 {
 ### **Estrutura de APIs Final:**
 ```
 🏠 Main Backend (EasyPanel):
-https://aitradingapi.roilabs.com.br
+https://apptapevision.roilabs.com.br
 ├── /api/auth
 ├── /api/users  
 ├── /api/trading
@@ -140,7 +140,7 @@ export class MLEngineService {
 - SSL: automático
 
 ### 3. **Backend EasyPanel unchanged:**
-- Continue usando `aitradingapi.roilabs.com.br`
+- Continue usando `apptapevision.roilabs.com.br`
 - Sem modificações necessárias
 
 ## ✅ **Plano de Ação**
@@ -155,5 +155,5 @@ export class MLEngineService {
 ---
 
 **🎉 Resultado:**
-- Backend principal: `aitradingapi.roilabs.com.br` (EasyPanel)
+- Backend principal: `apptapevision.roilabs.com.br` (EasyPanel)
 - ML Engine: `ml.aitradingapi.roilabs.com.br/v1/docs` (Railway)

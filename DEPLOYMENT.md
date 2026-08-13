@@ -7,8 +7,8 @@
 **Environment Variables to set in Vercel Dashboard:**
 
 ```env
-VITE_API_URL=https://aitradingapi.roilabs.com.br
-VITE_WS_URL=wss://aitradingapi.roilabs.com.br
+VITE_API_URL=https://apptapevision.roilabs.com.br
+VITE_WS_URL=wss://apptapevision.roilabs.com.br
 VITE_ENV=production
 VITE_NODE_ENV=production
 VITE_DEBUG=false
@@ -26,7 +26,7 @@ GENERATE_SOURCEMAP=false
 **Environment Variables to set in Vercel Dashboard:**
 
 ```env
-BACKEND_URL=https://aitradingapi.roilabs.com.br
+BACKEND_URL=https://apptapevision.roilabs.com.br
 BACKEND_API_KEY=ml-engine-api-key-2025
 ML_ENGINE_EMAIL=ml.engine@aitrading.roilabs.com.br
 ML_ENGINE_PASSWORD=MLEngine@2025!
@@ -48,7 +48,7 @@ LOG_FORMAT=json
 3. Add each variable with Production scope
 4. Redeploy the project
 
-### 3. Easypanel Backend (aitradingapi.roilabs.com.br)
+### 3. Easypanel Backend (apptapevision.roilabs.com.br)
 
 **Environment Variables to set in Easypanel:**
 
@@ -128,12 +128,12 @@ After deployment, test these endpoints:
 
 1. **Backend Health Check:**
    ```
-   GET https://aitradingapi.roilabs.com.br/health
+   GET https://apptapevision.roilabs.com.br/health
    ```
 
 2. **Authentication:**
    ```
-   POST https://aitradingapi.roilabs.com.br/api/auth/login
+   POST https://apptapevision.roilabs.com.br/api/auth/login
    {
      "email": "demo@aitrading.com",
      "password": "demo2025"
@@ -142,7 +142,7 @@ After deployment, test these endpoints:
 
 3. **ML Engine Integration:**
    ```
-   GET https://aitradingapi.roilabs.com.br/api/trading/ml/predictions
+   GET https://apptapevision.roilabs.com.br/api/trading/ml/predictions
    Authorization: Bearer [token]
    ```
 

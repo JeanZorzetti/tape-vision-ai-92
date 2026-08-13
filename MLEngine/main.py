@@ -1,6 +1,6 @@
 """
 AI Trading API - Production Ready
-Advanced ML-powered trading signal generation API for aitradingapi.roilabs.com.br
+Advanced ML-powered trading signal generation API for apptapevision.roilabs.com.br
 """
 import asyncio
 import logging
