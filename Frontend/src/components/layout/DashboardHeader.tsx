@@ -31,8 +31,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-text-primary">
-              AI Trading Bot - Interface Nelogica
+            <h1 className="flex items-center gap-3 text-xl font-bold text-text-primary">
+              <img src="/favicon.svg" alt="" width={32} height={32} aria-hidden="true" />
+              Tape Vision AI
             </h1>
             <time 
               className="text-sm text-text-secondary font-mono"

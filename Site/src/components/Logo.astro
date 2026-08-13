@@ -1,0 +1,60 @@
+---
+// Inline SVG so the mark inherits `currentColor` for the wordmark and
+// keeps the accent green fixed. Mirrors public/favicon.svg + public/og/logo.svg.
+// ponytail: the mask id is a fixed string — repeated instances on one page
+// resolve to the same identical definition, so no per-instance uid needed.
+interface Props {
+  variant?: 'full' | 'mark';
+  height?: number;
+  class?: string;
+}
+const { variant = 'full', height = 32, class: className } = Astro.props;
+const full = variant === 'full';
+---
+
+<svg
+  class={className}
+  viewBox={full ? '0 0 296 64' : '0 0 64 64'}
+  height={height}
+  width={full ? (height * 296) / 64 : height}
+  role="img"
+  aria-label="Tape Vision AI"
+>
+  <mask id="tvIris">
+    <rect width="64" height="64" fill="#fff" />
+    <circle cx="32" cy="32" r="14" fill="#000" />
+  </mask>
+  <g mask="url(#tvIris)" fill="#00ff88">
+    <rect x="6" y="26" width="4" height="12" rx="2" />
+    <rect x="12" y="20" width="4" height="24" rx="2" />
+    <rect x="18" y="15" width="4" height="34" rx="2" />
+    <rect x="24" y="11" width="4" height="42" rx="2" />
+    <rect x="30" y="9" width="4" height="46" rx="2" />
+    <rect x="36" y="11" width="4" height="42" rx="2" />
+    <rect x="42" y="15" width="4" height="34" rx="2" />
+    <rect x="48" y="20" width="4" height="24" rx="2" />
+    <rect x="54" y="26" width="4" height="12" rx="2" />
+  </g>
+  <circle cx="32" cy="32" r="7" fill="#00ff88" />
+  {
+    full && (
+      <text
+        x="80"
+        y="32"
+        dominant-baseline="central"
+        font-size="22"
+        font-weight="700"
+        letter-spacing="0.5"
+        fill="currentColor"
+      >
+        TAPE VISION <tspan fill="#00ff88">AI</tspan>
+      </text>
+    )
+  }
+</svg>
+
+<style>
+  text {
+    font-family: var(--font-sans);
+  }
+</style>

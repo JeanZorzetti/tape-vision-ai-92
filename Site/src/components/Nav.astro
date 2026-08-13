@@ -1,11 +1,14 @@
 ---
+import Logo from './Logo.astro';
 import { NAV_LINKS, PRODUCT_NAME } from '../lib/site';
 
 const currentPath = Astro.url.pathname;
 ---
 
 <nav aria-label="Principal">
-  <a href="/" class="brand">{PRODUCT_NAME}</a>
+  <a href="/" class="brand" aria-label={PRODUCT_NAME}>
+    <Logo height={28} />
+  </a>
   <ul>
     {
       NAV_LINKS.map((link) => (
@@ -30,7 +33,7 @@ const currentPath = Astro.url.pathname;
   }
 
   .brand {
-    font-weight: 700;
+    display: flex;
     text-decoration: none;
     color: var(--color-text);
   }
