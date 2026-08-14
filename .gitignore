@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Python (the local agent in agent/)
+__pycache__/
+*.py[cod]
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
