@@ -18,6 +18,11 @@ What's genuinely different from B3, so don't over-fit to it:
 Config via env vars:
   SYMBOL   default "btcusdt"  (lowercase, Binance convention)
 
+`events(symbol)` is the in-process hand-off point for other modules (engine.py):
+an async generator yielding each trade/book dict already parsed, one level
+before `_stream()`'s own print formatting. `python binance_feed.py` on its own
+still just prints, via `_stream()` consuming the same generator.
+
 Run the real thing:      python binance_feed.py
 Validate logic offline:  python binance_feed.py --selftest
 """
@@ -76,27 +81,65 @@ def _selftest():
     print("selftest OK — trade formatting and book-dedup are coherent")
 
 
-async def _stream(symbol):
-    import websockets  # imported here so --selftest runs without the dependency
+def _selftest_events():
+    """Prove `events()` parses fabricated WebSocket messages correctly — no network."""
+    async def fake_source():
+        yield json.dumps({"stream": "btcusdt@trade", "data": {
+            "T": 1_723_000_000_123, "p": "65000.50", "q": "0.01200", "m": False,
+        }})
+        yield json.dumps({"stream": "btcusdt@bookTicker", "data": {
+            "b": "65000.00", "B": "1.5", "a": "65000.50", "A": "2.0",
+        }})
 
-    url = f"wss://stream.binance.com:9443/stream?streams={symbol}@trade/{symbol}@bookTicker"
+    async def run():
+        return [msg async for msg in events("btcusdt", source=fake_source())]
+
+    msgs = asyncio.run(run())
+    assert len(msgs) == 2, msgs
+    assert msgs[0]["T"] == 1_723_000_000_123 and aggression(msgs[0]) == "buy", msgs[0]
+    assert msgs[1]["b"] == "65000.00" and "T" not in msgs[1], msgs[1]
+
+    print("selftest OK — events() parses fabricated messages without a network connection")
+
+
+async def events(symbol, source=None):
+    """Async generator of parsed trade/book dicts — the in-process hand-off point.
+
+    Connects to the live Binance WebSocket and yields each message's already-
+    parsed `data` dict by default. `source`, if given, is an async iterable of
+    raw message strings instead (used by --selftest and any caller that wants
+    to supply its own connection); this keeps `websockets` an import needed
+    only on the live path.
+    """
+    if source is None:
+        import websockets  # imported here so --selftest runs without the dependency
+
+        url = f"wss://stream.binance.com:9443/stream?streams={symbol}@trade/{symbol}@bookTicker"
+        print(f"connecting to {url} ...", flush=True)
+        async with websockets.connect(url, ping_interval=20) as ws:
+            print(f"connected. streaming {symbol.upper()} (Ctrl+C to stop)...", flush=True)
+            async for raw in ws:
+                yield json.loads(raw)["data"]
+    else:
+        async for raw in source:
+            yield json.loads(raw)["data"]
+
+
+async def _stream(symbol):
     prev_top = None
-    print(f"connecting to {url} ...", flush=True)
-    async with websockets.connect(url, ping_interval=20) as ws:
-        print(f"connected. streaming {symbol.upper()} (Ctrl+C to stop)...", flush=True)
-        async for raw in ws:
-            msg = json.loads(raw)["data"]
-            if "T" in msg:  # trade event
-                print(fmt_trade(symbol, msg), flush=True)
-            else:  # bookTicker event
-                line, prev_top = fmt_book(symbol, msg, prev_top)
-                if line:
-                    print(line, flush=True)
+    async for msg in events(symbol):
+        if "T" in msg:  # trade event
+            print(fmt_trade(symbol, msg), flush=True)
+        else:  # bookTicker event
+            line, prev_top = fmt_book(symbol, msg, prev_top)
+            if line:
+                print(line, flush=True)
 
 
 def main():
     if "--selftest" in sys.argv:
         _selftest()
+        _selftest_events()
         return
 
     symbol = os.environ.get("SYMBOL", "btcusdt").lower()

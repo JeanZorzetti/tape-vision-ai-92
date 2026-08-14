@@ -28,10 +28,14 @@ classification, imbalance math, window matching, wiring) — no live feed requir
 
 ## Validate User Story 1 — real-time signal on live data
 
-1. `python agent/engine.py` (defaults to `SYMBOL=btcusdt`, session filtering off).
-2. Watch stdout. During the first ~100 trades (cold start, matching
-   `normalize.RollingSizes`' `min_samples`), confirm **no** `signal` lines appear —
-   only whatever trade/book activity logging the engine prints at a lower level.
+1. `python agent/engine.py` (defaults to `SYMBOL=btcusdt`, `MIN_SAMPLES=500`,
+   session filtering off).
+2. Watch stdout. During the first ~500 trades (cold start; `MIN_SAMPLES` raised
+   from `normalize.RollingSizes`' own 100-sample default after a T007 live
+   finding — BTCUSDT's size distribution is right-skewed enough that 100
+   samples misjudged the tail), confirm **no** output appears at all — the
+   engine only ever prints a `signal` line or a `[GAP]` notice, nothing per
+   ordinary trade/book event.
 3. Once warmed up, confirm a `signal` JSON line appears when a trade's size ranks
    at or above the 95th percentile with a clear aggressor side — and that the
    `trigger` field in that line names the actual trade that caused it (SC-003).
@@ -44,18 +48,20 @@ classification, imbalance math, window matching, wiring) — no live feed requir
 2. Afterward, inspect `session.log`:
    - No crash / traceback.
    - No signal before the cold-start warm-up completed (grep timestamps against
-     the 100th trade).
+     the 500th trade — `MIN_SAMPLES`, see "Validate User Story 1" above).
    - No unreasonable signal flood (sanity-check: signal count should be a small
-     fraction of total trade count).
+     fraction of total trade count — a live diagnostic during T007 measured
+     ~6% at `MIN_SAMPLES=500` over 3000 real BTCUSDT trades).
 
 ## Validate User Story 3 — session filtering
 
-1. Run with filtering forced on and a narrow window that excludes "now":
-   `SESSION_FILTER=on python agent/engine.py` (exact env var name is an
-   implementation detail of `session_filter.py`, finalized in `tasks.md`).
+1. Run with filtering forced on and a narrow window that excludes "now" (local
+   time, `HH:MM-HH:MM`, comma-separated for more than one window):
+   `SESSION_FILTER=on SESSION_WINDOWS="00:00-00:01" python agent/engine.py`.
 2. Confirm no signals are emitted even when a qualifying trade occurs.
-3. Re-run with the window set to include "now" (or filtering off): confirm
-   qualifying trades do produce signals.
+3. Re-run with `SESSION_WINDOWS` set to a window that includes "now" (or drop
+   `SESSION_FILTER` to leave filtering off, its default): confirm qualifying
+   trades do produce signals.
 
 ## Out of scope for this quickstart
 
