@@ -128,7 +128,7 @@ async def run(symbol, gap_timeout=DEFAULT_GAP_TIMEOUT, source=None, cutoff=None,
             done, _ = await asyncio.wait({next_task}, timeout=gap_timeout)
             if not done:
                 if not gap_announced:
-                    print(f"[GAP] no event for {gap_timeout:.0f}s — suspending signal emission", flush=True)
+                    print(f"[GAP] no event for {gap_timeout:.0f}s — suspending signal emission", file=sys.stderr, flush=True)
                     gap_announced = True
                 continue  # keep waiting on the same pending next_task, generator untouched
             try:
@@ -196,7 +196,7 @@ def _selftest_run():
 
     import contextlib
     captured = io.StringIO()
-    with contextlib.redirect_stdout(captured):
+    with contextlib.redirect_stderr(captured):
         asyncio.run(run("btcusdt", gap_timeout=0.05, source=_fake_source(delay=0.15), min_samples=100))
     assert "[GAP]" in captured.getvalue(), captured.getvalue()
 
