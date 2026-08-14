@@ -88,7 +88,7 @@ detection logic yet.
 
 - [X] T010 [P] [US3] Create `agent/session_filter.py`: `SessionFilterConfig` (`enabled: bool`, `windows: list[(datetime.time, datetime.time)]`) plus an `is_allowed(config, timestamp) -> bool` predicate (FR-007; data-model.md Session Filter Config); `--selftest` covers enabled+in-window, enabled+out-of-window, and disabled cases
 - [X] T011 [US3] Wire `session_filter` (T010) into `agent/engine.py`'s main loop (depends on T006, T010): check `is_allowed()` before writing any signal; default `enabled=False`
-- [ ] T012 [US3] Manually validate per quickstart.md's "Validate User Story 3" section: filtering on with a narrow window suppresses signals, filtering off (or in-window) does not
+- [X] T012 [US3] Manually validate per quickstart.md's "Validate User Story 3" section: filtering on with a narrow window suppresses signals, filtering off (or in-window) does not. **Live finding**: two live 120s runs against real BTCUSDT, same conditions — `SESSION_FILTER=on SESSION_WINDOWS="00:00-00:01"` (excludes "now") produced 0 signals; default (filtering off) produced 114 signals over the same duration. No crash, no GAP in either run.
 
 **Checkpoint**: All three user stories independently functional — the engine detects signals, has been proven stable unattended, and respects session rules when a market needs them.
 
