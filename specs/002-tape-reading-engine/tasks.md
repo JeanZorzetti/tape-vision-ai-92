@@ -71,7 +71,7 @@ detection logic yet.
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Manually run `python agent/engine.py > session.log` for a multi-hour unattended session per quickstart.md's "Validate User Story 2" section; confirm no crash, no signal before warm-up completed, and signal count stays a small fraction of trade count (SC-001, SC-002)
+- [X] T008 [US2] Manually run `python agent/engine.py > session.log` for a multi-hour unattended session per quickstart.md's "Validate User Story 2" section; confirm no crash, no signal before warm-up completed, and signal count stays a small fraction of trade count (SC-001, SC-002). **Live finding**: 3h live run against real BTCUSDT (17:33:24-20:33:24 UTC), killed cleanly by an external 3h timeout. `session.err` (GAP/traceback channel) stayed 0 bytes — no crash, no feed gap. 14,087 signals over 10,776s (~1.3/s), first signal 25.3s after connecting — consistent with the 500-trade `MIN_SAMPLES` warm-up at the observed ~20 trades/s, not on trade #1. Per-15-min-bucket counts tracked market activity (692-1,671) with no runaway flood, matching T007's ~6% calibration.
 - [X] T009 [P] [US2] Add a "feed independence" case to `order_flow_analyzer.py`'s (or `engine.py`'s) `--selftest`: feed it fabricated trade/book events shaped like a *non*-Binance source and confirm signal detection behaves identically, mechanically proving FR-008/SC-004 rather than relying on code inspection
 
 **Checkpoint**: User Stories 1 AND 2 both work independently — the engine is proven safe to run unattended and its detection logic is proven feed-agnostic.
